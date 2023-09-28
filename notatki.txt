@@ -1,0 +1,7 @@
+przezroczysty button wykonujący jakąś akcję:
+
+ transparent button with action
+transparent_button = tk.Button(root, command=exit_app, bg="#c8e4b2", bd=0)
+transparent_button.place(x=0, y=0)
+def exit_app():
+    root.destroy()
