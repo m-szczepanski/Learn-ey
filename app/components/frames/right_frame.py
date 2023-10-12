@@ -3,13 +3,14 @@ from tkinter import PhotoImage
 import math
 
 BACKGROUND = "#cde3b6"
-WORK_MIN = 25
-SHORT_BREAK_MIN = 5
-LONG_BREAK_MIN = 20
+WORK_MIN = 0.1 #25
+SHORT_BREAK_MIN = 0.1 #5
+LONG_BREAK_MIN = 0.1 #20
 repetitions = 0
 num_of_ticks = ""
 timer = None
 current_stare = "idle"
+is_paused = True
 
 
 class RightFrame(tk.Frame):
@@ -23,6 +24,12 @@ class RightFrame(tk.Frame):
         self.pack(side="right")
 
     # Pomodoro section
+    #     self.repetitions = 0
+    #     self.num_of_ticks = ""
+    #     self.timer = None
+    #     self.current_stare = "idle"
+    #     self.is_paused = False
+
         self.timer = tk.Label(self, text="--:--", font=('Courier', 28, "normal"), fg="#FFD9B7", background="#dd2e44",
                               bd=0)
         self.timer.place(x=80, y=130)
@@ -34,7 +41,7 @@ class RightFrame(tk.Frame):
         self.pause_button_bg = PhotoImage(file="./components/graphical_components/pomodoro/pomodoro_pause_button.png")
         self.stop_button_bg = PhotoImage(file="./components/graphical_components/pomodoro/pomodoro_stop_button.png")
 
-        self.pause_button = tk.Button(self, command=self.open_about, image=self.pause_button_bg, bd=0,
+        self.pause_button = tk.Button(self, command=self.pause_timer, image=self.pause_button_bg, bd=0,
                                       background=BACKGROUND)
         self.pause_button.place(x=44, y=267)
         self.pause_button.place(x=44, y=267)
@@ -68,27 +75,28 @@ class RightFrame(tk.Frame):
         self.quit_button.place(x=45, y=602)
 
     def count_down(self, count):
-        global num_of_ticks
+        global num_of_ticks, is_paused
         count_min = math.floor(count / 60)
         count_sec = count % 60
-        if count_min < 10:
-            count_min = f"0{count_min}"
-        if count_sec == 0:
-            count_sec = "00"
-        elif count_sec < 10:
-            count_sec = f"0{count_sec}"
-        self.timer.config(text=f"{count_min}:{count_sec}")
-        if count > 0:
-            global timer
-            timer = self.master.after(1000, self.count_down, count - 1)
-        else:
-            self.start_timer()
-            if repetitions % 2 == 0:
-                num_of_ticks += "✔️"
-                self.tick.config(text=num_of_ticks)
-            if repetitions % 8 == 0:
-                num_of_ticks = ""
-                self.tick.config(text=num_of_ticks)
+        if is_paused == False:
+            if count_min < 10:
+                count_min = f"0{count_min}"
+            if count_sec == 0:
+                count_sec = "00"
+            elif count_sec < 10:
+                count_sec = f"0{count_sec}"
+            self.timer.config(text=f"{count_min}:{count_sec}")
+            if count > 0:
+                global timer
+                timer = self.master.after(1000, self.count_down, count - 1)
+            else:
+                self.start_timer()
+                if repetitions % 2 == 0:
+                    num_of_ticks += "✔️"
+                    self.tick.config(text=num_of_ticks)
+                if repetitions % 8 == 0:
+                    num_of_ticks = ""
+                    self.tick.config(text=num_of_ticks)
 
     def reset_timer(self):
         global repetitions, num_of_ticks
@@ -98,8 +106,19 @@ class RightFrame(tk.Frame):
         repetitions = 0
         num_of_ticks = ""
 
+    def pause_timer(self):
+        global repetitions, num_of_ticks, timer, is_paused
+        current_value = self.timer.cget("text")
+        pomodoros = num_of_ticks
+        is_paused = True
+        print(f"current timer value is: {current_value}\n"
+              f"number of pomodoros: {pomodoros}\n"
+              f"number of repetitions: {repetitions}")
+
     def start_timer(self):
-        global repetitions
+        global repetitions, is_paused
+        #if is_paused != True:
+        is_paused = False
         repetitions += 1
         if repetitions % 8 == 0:
             self.count_down(LONG_BREAK_MIN * 60)
