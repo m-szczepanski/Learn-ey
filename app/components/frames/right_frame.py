@@ -1,16 +1,15 @@
 import tkinter as tk
 from tkinter import PhotoImage
 import math
+import json
 
 BACKGROUND = "#cde3b6"
-WORK_MIN = 0.1 #25
-SHORT_BREAK_MIN = 0.1 #5
-LONG_BREAK_MIN = 0.1 #20
+# WORK_MIN = 0.1 #25
+# SHORT_BREAK_MIN = 0.1 #5
+# LONG_BREAK_MIN = 0.1 #20
 repetitions = 0
 num_of_ticks = ""
 timer = None
-current_stare = "idle"
-is_paused = True
 
 
 class RightFrame(tk.Frame):
@@ -24,11 +23,11 @@ class RightFrame(tk.Frame):
         self.pack(side="right")
 
     # Pomodoro section
-    #     self.repetitions = 0
-    #     self.num_of_ticks = ""
-    #     self.timer = None
-    #     self.current_stare = "idle"
-    #     self.is_paused = False
+        with open("components/Pomodoro/settings.json", 'r') as pomodoro_settings:
+            data = json.load(pomodoro_settings)
+        work_min = data["WORK_MIN"]
+        short_break_min = data["SHORT_BREAK_MIN"]
+        long_break_min = data["LONG_BREAK_MIN"]
 
         self.timer = tk.Label(self, text="--:--", font=('Courier', 28, "normal"), fg="#FFD9B7", background="#dd2e44",
                               bd=0)
@@ -38,19 +37,23 @@ class RightFrame(tk.Frame):
         self.tick.place(x=95, y=200)
 
         self.start_button_bg = PhotoImage(file="./components/graphical_components/pomodoro/pomodoro_start_button.png")
-        self.pause_button_bg = PhotoImage(file="./components/graphical_components/pomodoro/pomodoro_pause_button.png")
+        self.options_button_bg = PhotoImage(file=
+                                            "./components/graphical_components/pomodoro/pomodoro_options_button.png")
         self.stop_button_bg = PhotoImage(file="./components/graphical_components/pomodoro/pomodoro_stop_button.png")
 
-        self.pause_button = tk.Button(self, command=self.pause_timer, image=self.pause_button_bg, bd=0,
+        self.start_button = tk.Button(self, command=lambda: self.start_timer(work_min,
+                                                                             short_break_min,
+                                                                             long_break_min),
+                                      image=self.start_button_bg, bd=0,
                                       background=BACKGROUND)
-        self.pause_button.place(x=44, y=267)
-        self.pause_button.place(x=44, y=267)
-        self.start_button = tk.Button(self, command=self.start_timer, image=self.start_button_bg, bd=0,
-                                      background=BACKGROUND)
-        self.start_button.place(x=112, y=267)
+        self.start_button.place(x=41, y=267)
         self.stop_button = tk.Button(self, command=self.reset_timer, image=self.stop_button_bg, bd=0,
                                      background=BACKGROUND)
-        self.stop_button.place(x=180, y=267)
+        self.stop_button.place(x=110, y=267)
+
+        self.options_button = tk.Button(self, command=self.pause_timer, image=self.options_button_bg, bd=0,
+                                        background=BACKGROUND)
+        self.options_button.place(x=178, y=267)
 
         self.timer_state_idle_bg = PhotoImage(file="./components/graphical_components/pomodoro/start_the_timer.png")
         self.timer_state_learning_time = PhotoImage(file="./components/graphical_components/pomodoro/learning_time.png")
@@ -64,39 +67,38 @@ class RightFrame(tk.Frame):
 
         self.main_panel_button = tk.Button(self, command=self.open_main_panel, image=self.main_panel_bg,
                                            bd=0, background='#cde3b6')
-        self.main_panel_button.place(x=45, y=471)
+        self.main_panel_button.place(x=38, y=471)
 
         self.about_button = tk.Button(self, command=self.open_about, image=self.about_button_bg, bd=0,
                                       background='#cde3b6', highlightthickness=0, highlightbackground=self.cget("bg"))
-        self.about_button.place(x=45, y=537)
+        self.about_button.place(x=38, y=537)
 
         self.quit_button = tk.Button(self, command=self.quit_app, image=self.quit_button_bg, bd=0, background='#cde3b6',
                                      highlightthickness=0, highlightbackground='#cde3b6')
-        self.quit_button.place(x=45, y=602)
+        self.quit_button.place(x=38, y=602)
 
     def count_down(self, count):
-        global num_of_ticks, is_paused
+        global num_of_ticks
         count_min = math.floor(count / 60)
         count_sec = count % 60
-        if is_paused == False:
-            if count_min < 10:
-                count_min = f"0{count_min}"
-            if count_sec == 0:
-                count_sec = "00"
-            elif count_sec < 10:
-                count_sec = f"0{count_sec}"
-            self.timer.config(text=f"{count_min}:{count_sec}")
-            if count > 0:
-                global timer
-                timer = self.master.after(1000, self.count_down, count - 1)
-            else:
-                self.start_timer()
-                if repetitions % 2 == 0:
-                    num_of_ticks += "✔️"
-                    self.tick.config(text=num_of_ticks)
-                if repetitions % 8 == 0:
-                    num_of_ticks = ""
-                    self.tick.config(text=num_of_ticks)
+        if count_min < 10:
+            count_min = f"0{count_min}"
+        if count_sec == 0:
+            count_sec = "00"
+        elif count_sec < 10:
+            count_sec = f"0{count_sec}"
+        self.timer.config(text=f"{count_min}:{count_sec}")
+        if count > 0:
+            global timer
+            timer = self.master.after(1000, self.count_down, count - 1)
+        else:
+            self.start_timer()
+            if repetitions % 2 == 0:
+                num_of_ticks += "✔️"
+                self.tick.config(text=num_of_ticks)
+            if repetitions % 8 == 0:
+                num_of_ticks = ""
+                self.tick.config(text=num_of_ticks)
 
     def reset_timer(self):
         global repetitions, num_of_ticks
@@ -107,27 +109,19 @@ class RightFrame(tk.Frame):
         num_of_ticks = ""
 
     def pause_timer(self):
-        global repetitions, num_of_ticks, timer, is_paused
-        current_value = self.timer.cget("text")
-        pomodoros = num_of_ticks
-        is_paused = True
-        print(f"current timer value is: {current_value}\n"
-              f"number of pomodoros: {pomodoros}\n"
-              f"number of repetitions: {repetitions}")
+        pass
 
-    def start_timer(self):
-        global repetitions, is_paused
-        #if is_paused != True:
-        is_paused = False
+    def start_timer(self, work_min, short_break_min, long_break_min):
+        global repetitions
         repetitions += 1
         if repetitions % 8 == 0:
-            self.count_down(LONG_BREAK_MIN * 60)
+            self.count_down(int(long_break_min) * 60)
             #title.config(text=f"Przerwa", fg=RED, font=(FONT_NAME, 28, "bold"))
         elif repetitions % 2 == 0:
-            self.count_down(SHORT_BREAK_MIN * 60)
+            self.count_down(int(short_break_min) * 60)
             #title.config(text=f"Przerwa", fg=PINK, font=(FONT_NAME, 28, "bold"))
         else:
-            self.count_down(WORK_MIN * 60)
+            self.count_down(int(work_min) * 60)
             #title.config(text=f"Praca", fg=GREEN, font=(FONT_NAME, 32, "bold"))
 
     def open_main_panel(self):
