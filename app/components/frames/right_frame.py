@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import PhotoImage
 import math
 import json
+from ..pomodoro_settings import PomodoroSettings
 
 BACKGROUND = "#cde3b6"
 # WORK_MIN = 0.1 #25
@@ -51,7 +52,7 @@ class RightFrame(tk.Frame):
                                      background=BACKGROUND)
         self.stop_button.place(x=110, y=267)
 
-        self.options_button = tk.Button(self, command=self.pause_timer, image=self.options_button_bg, bd=0,
+        self.options_button = tk.Button(self, command=self.open_settings, image=self.options_button_bg, bd=0,
                                         background=BACKGROUND)
         self.options_button.place(x=178, y=267)
 
@@ -108,8 +109,10 @@ class RightFrame(tk.Frame):
         repetitions = 0
         num_of_ticks = ""
 
-    def pause_timer(self):
-        pass
+    def open_settings(self):
+        root = tk.Toplevel()
+        settings_app = PomodoroSettings(root)
+
 
     def start_timer(self, work_min, short_break_min, long_break_min):
         global repetitions
