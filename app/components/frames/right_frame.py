@@ -5,9 +5,6 @@ import json
 from ..pomodoro_settings import PomodoroSettings
 
 BACKGROUND = "#cde3b6"
-# WORK_MIN = 0.1 #25
-# SHORT_BREAK_MIN = 0.1 #5
-# LONG_BREAK_MIN = 0.1 #20
 repetitions = 0
 num_of_ticks = ""
 timer = None
@@ -24,11 +21,7 @@ class RightFrame(tk.Frame):
         self.pack(side="right")
 
     # Pomodoro section
-        with open("components/Pomodoro/settings.json", 'r') as pomodoro_settings:
-            data = json.load(pomodoro_settings)
-        work_min = data["WORK_MIN"]
-        short_break_min = data["SHORT_BREAK_MIN"]
-        long_break_min = data["LONG_BREAK_MIN"]
+        self.get_settings()
 
         self.timer = tk.Label(self, text="--:--", font=('Courier', 28, "normal"), fg="#FFD9B7", background="#dd2e44",
                               bd=0)
@@ -42,11 +35,8 @@ class RightFrame(tk.Frame):
                                             "./components/graphical_components/pomodoro/pomodoro_options_button.png")
         self.stop_button_bg = PhotoImage(file="./components/graphical_components/pomodoro/pomodoro_stop_button.png")
 
-        self.start_button = tk.Button(self, command=lambda: self.start_timer(work_min,
-                                                                             short_break_min,
-                                                                             long_break_min),
-                                      image=self.start_button_bg, bd=0,
-                                      background=BACKGROUND)
+        self.start_button = tk.Button(self, command=lambda: self.start_timer(),
+                                      image=self.start_button_bg, bd=0, background=BACKGROUND)
         self.start_button.place(x=41, y=267)
         self.stop_button = tk.Button(self, command=self.reset_timer, image=self.stop_button_bg, bd=0,
                                      background=BACKGROUND)
@@ -113,19 +103,25 @@ class RightFrame(tk.Frame):
         root = tk.Toplevel()
         settings_app = PomodoroSettings(root)
 
+    def get_settings(self):
+        with open("components/Pomodoro/settings.json", 'r') as pomodoro_settings:
+            data = json.load(pomodoro_settings)
+        work_min = data["WORK_MIN"]
+        short_break_min = data["SHORT_BREAK_MIN"]
+        long_break_min = data["LONG_BREAK_MIN"]
+        return work_min, short_break_min, long_break_min
 
-    def start_timer(self, work_min, short_break_min, long_break_min):
+    def start_timer(self):
         global repetitions
+        work_min, short_break_min, long_break_min = self.get_settings()
         repetitions += 1
         if repetitions % 8 == 0:
             self.count_down(int(long_break_min) * 60)
-            #title.config(text=f"Przerwa", fg=RED, font=(FONT_NAME, 28, "bold"))
         elif repetitions % 2 == 0:
             self.count_down(int(short_break_min) * 60)
-            #title.config(text=f"Przerwa", fg=PINK, font=(FONT_NAME, 28, "bold"))
         else:
             self.count_down(int(work_min) * 60)
-            #title.config(text=f"Praca", fg=GREEN, font=(FONT_NAME, 32, "bold"))
+
 
     def open_main_panel(self):
         print('Main Panel button has been pressed')
