@@ -7,7 +7,7 @@ from app.components.frames.right_frame import RightFrame
 class MainPanel:
     def __init__(self, root):
         self.panel = root
-        self.panel.title("Learn-ey")
+        self.panel.title("Learn-ey Main Panel")
         self.panel.geometry('961x698')
         self.panel.resizable(False, False)
         self.background_image = PhotoImage(file="./components/graphical_components/shared/background.png")
