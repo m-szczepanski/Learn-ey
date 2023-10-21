@@ -2,7 +2,8 @@ import tkinter as tk
 from tkinter import PhotoImage
 import math
 import json
-from ..pomodoro_settings import PomodoroSettings
+from app.components.pomodoro_settings import PomodoroSettings
+
 
 BACKGROUND = "#cde3b6"
 repetitions = 0
@@ -10,17 +11,79 @@ num_of_ticks = ""
 timer = None
 
 
-class RightFrame(tk.Frame):
-    def __init__(self, master=None):
+class MainPanel(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Learn-ey Main Panel")
+        self.geometry('961x698')
+        self.resizable(False, False)
+        self.background_image = PhotoImage(file="./components/graphical_components/shared/background.png")
+        self.background = tk.Label(self, image=self.background_image)
+        self.background.place(relwidth=1, relheight=1)
+        self.current_left_frame = None
+
+        self.frames = {}
+
+        # Utwórz ramki
+        self.frames["left_frame"] = Frame1(self)
+        self.frames["right_frame"] = Frame2(self)
+        self.frames["word_frame"] = Frame3(self)
+
+        self.open_initial_frames()
+
+    def show_frame(self, frame_name):
+        frame = self.frames.get(frame_name)
+        if frame:
+            if frame_name == 'right_frame':
+                frame.pack(side="right", fill='y')
+            else:
+                frame.pack(side="left", fill='y')
+
+            frame.tkraise()
+
+            if self.current_left_frame:
+                self.current_left_frame.forget()
+                self.current_left_frame = frame
+
+    def open_initial_frames(self):
+        self.show_frame("left_frame")
+        self.show_frame("right_frame")
+        self.current_left_frame = self.frames['left_frame']
+
+
+class Frame1(tk.Frame):
+    def __init__(self, master):
         super().__init__(master)
-        self.master = master
+        self.configure(width=696, height=698)
+        self.background_image = PhotoImage(file="./components/graphical_components/main_panel/left_frame.png")
+        self.background = tk.Label(self, image=self.background_image)
+        self.background.place(relwidth=1, relheight=1)
+        self.pack(side="left")
+
+        # top panel
+        panels_position_x = [255, 463, 47, 255, 463]
+        panels_position_y = [47, 57, 217, 217, 217]
+        self.new_session_button_bg = (
+            PhotoImage(file="./components/graphical_components/main_panel/add_session_button.png"))
+
+        self.new_session_button = tk.Button(self, command=lambda: master.show_frame("word_frame"),
+                                            image=self.new_session_button_bg, bd=0, background='#9ed2be')
+        self.new_session_button.place(x=50, y=42)
+
+    def forget(self):
+        self.pack_forget()
+
+
+class Frame2(tk.Frame):
+    def __init__(self, master):
+        super().__init__(master)
         self.configure(width=265, height=698)
         self.background_image = PhotoImage(file="./components/graphical_components/main_panel/right_frame.png")
         self.background = tk.Label(self, image=self.background_image)
         self.background.place(relwidth=1, relheight=1)
         self.pack(side="right")
 
-    # Pomodoro section
+        # Pomodoro section
         self.get_settings()
 
         self.timer = tk.Label(self, text="--:--", font=('Courier', 28, "normal"), fg="#FFD9B7", background="#dd2e44",
@@ -47,16 +110,20 @@ class RightFrame(tk.Frame):
         self.options_button.place(x=178, y=267)
 
         self.timer_state_idle_bg = PhotoImage(file="./components/graphical_components/pomodoro/start_the_timer.png")
-        self.timer_state_learning_time = PhotoImage(file="./components/graphical_components/pomodoro/learning_time.png")
-        self.timer_state_quick_break = PhotoImage(file="./components/graphical_components/pomodoro/quick_break.png")
-        self.timer_state_long_break = PhotoImage(file="./components/graphical_components/pomodoro/long_break.png")
+        self.timer_state_learning_time_bg = PhotoImage(
+            file="./components/graphical_components/pomodoro/learning_time.png")
+        self.timer_state_quick_break_bg = PhotoImage(file="./components/graphical_components/pomodoro/quick_break.png")
+        self.timer_state_long_break_bg = PhotoImage(file="./components/graphical_components/pomodoro/long_break.png")
 
-    # Menu section
+        self.status_label = tk.Label(self, image=self.timer_state_idle_bg, fg="#FFD9B7", background="#c8e4b2", bd=0)
+        self.status_label.place(x=50, y=333)
+
+        # Menu section
         self.main_panel_bg = PhotoImage(file="./components/graphical_components/main_panel/main_panel_button.png")
         self.about_button_bg = PhotoImage(file="./components/graphical_components/main_panel/about_button.png")
         self.quit_button_bg = PhotoImage(file="./components/graphical_components/main_panel/quit_button.png")
 
-        self.main_panel_button = tk.Button(self, command=self.open_main_panel, image=self.main_panel_bg,
+        self.main_panel_button = tk.Button(self, command=lambda: master.show_frame("left_frame"), image=self.main_panel_bg,
                                            bd=0, background='#cde3b6')
         self.main_panel_button.place(x=38, y=471)
 
@@ -96,6 +163,7 @@ class RightFrame(tk.Frame):
         self.after_cancel(timer)
         self.timer.config(text="--:--")
         self.tick.config(text="")
+        self.status_label.config(image=self.timer_state_idle_bg)
         repetitions = 0
         num_of_ticks = ""
 
@@ -117,19 +185,39 @@ class RightFrame(tk.Frame):
         repetitions += 1
         if repetitions % 8 == 0:
             self.count_down(int(long_break_min) * 60)
+            self.status_label.config(image=self.timer_state_long_break_bg)
         elif repetitions % 2 == 0:
             self.count_down(int(short_break_min) * 60)
+            self.status_label.config(image=self.timer_state_quick_break_bg)
         else:
             self.count_down(int(work_min) * 60)
-
+            self.status_label.config(image=self.timer_state_learning_time_bg)
 
     def open_main_panel(self):
         print('Main Panel button has been pressed')
+        from app.components.main_panel import MainPanel
+        # self.master.destroy()
 
     def open_about(self):
         print('About button has been pressed')
 
     def quit_app(self):
-        from app.components.main_panel import MainPanel
-        main_panel = MainPanel(self.master)
-        main_panel.quit_app()
+        # from app.components.main_panel import MainPanel
+        # main_panel = MainPanel(self.master)
+        # main_panel.quit_app()
+        self.master.destroy()
+
+
+class Frame3(tk.Frame):
+    def __init__(self, master):
+        super().__init__(master)
+        self.configure(width=696, height=698)
+        self.background_image = PhotoImage(file="./components/graphical_components/material_panel/word_section.png")
+        self.background = tk.Label(self, image=self.background_image)
+        self.background.place(relwidth=1, relheight=1)
+        self.pack(side="left")
+
+
+if __name__ == "__main__":
+    app = MainPanel()
+    app.mainloop()
