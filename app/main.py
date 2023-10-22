@@ -3,7 +3,8 @@ from tkinter import PhotoImage
 import math
 import json
 from app.components.pomodoro_settings import PomodoroSettings
-
+import threading
+import time
 
 BACKGROUND = "#cde3b6"
 repetitions = 0
@@ -14,14 +15,13 @@ timer = None
 class MainPanel(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Learn-ey Main Panel")
+        self.title("Learn-ey")
         self.geometry('961x698')
         self.resizable(False, False)
         self.background_image = PhotoImage(file="./components/graphical_components/shared/background.png")
         self.background = tk.Label(self, image=self.background_image)
         self.background.place(relwidth=1, relheight=1)
         self.current_left_frame = None
-
 
         self.frames = {}
 
@@ -31,13 +31,17 @@ class MainPanel(tk.Tk):
         self.frames["expression_frame"] = ExpressionSection(self)
 
         self.open_initial_frames()
+        self.frames["right_frame"].set_main_panel_button_visibility(False)
 
     def show_frame(self, frame_name):
         if frame := self.frames.get(frame_name):
+            if frame_name == 'left_frame':
+                self.frames["right_frame"].set_main_panel_button_visibility(False)
             if frame_name == 'right_frame':
                 frame.pack(side="right", fill='y')
             else:
                 frame.pack(side="left", fill='y')
+                self.frames['right_frame'].set_main_panel_button_visibility(True)
 
             frame.tkraise()
 
@@ -46,6 +50,10 @@ class MainPanel(tk.Tk):
                 self.current_left_frame = frame
 
     def open_initial_frames(self):
+        for frame in self.frames:
+            if frame != ['left_frame', 'right_frame']:
+                self.frames[frame].forget()
+
         self.show_frame("left_frame")
         self.show_frame("right_frame")
         self.current_left_frame = self.frames['left_frame']
@@ -119,11 +127,13 @@ class RightFrame(tk.Frame):
         self.status_label.place(x=50, y=333)
 
         # Menu section
+        self.main_panel_button_enabled = False
+
         self.main_panel_bg = PhotoImage(file="./components/graphical_components/main_panel/main_panel_button.png")
         self.about_button_bg = PhotoImage(file="./components/graphical_components/main_panel/about_button.png")
         self.quit_button_bg = PhotoImage(file="./components/graphical_components/main_panel/quit_button.png")
 
-        self.main_panel_button = tk.Button(self, command=lambda: master.show_frame("left_frame"),
+        self.main_panel_button = tk.Button(self, command=self.open_main_panel,
                                            image=self.main_panel_bg, bd=0, background='#cde3b6')
         self.main_panel_button.place(x=38, y=471)
 
@@ -134,6 +144,8 @@ class RightFrame(tk.Frame):
         self.quit_button = tk.Button(self, command=self.quit_app, image=self.quit_button_bg, bd=0, background='#cde3b6',
                                      highlightthickness=0, highlightbackground='#cde3b6')
         self.quit_button.place(x=38, y=602)
+
+        self.monitor_button_state()
 
     def count_down(self, count):
         global num_of_ticks
@@ -193,6 +205,25 @@ class RightFrame(tk.Frame):
             self.count_down(int(work_min) * 60)
             self.status_label.config(image=self.timer_state_learning_time_bg)
 
+    def open_main_panel(self):
+        if self.main_panel_button_enabled:
+            self.master.show_frame("left_frame")
+            self.set_main_panel_button_visibility(False)
+
+    def set_main_panel_button_visibility(self, value):
+        self.main_panel_button_enabled = value
+
+    def monitor_button_state(self):
+        def check_state():
+            while True:
+                self.main_panel_button.config(state="normal") if self.main_panel_button_enabled else (
+                    self.main_panel_button.config(state="disabled"))
+                time.sleep(0.5)
+
+        thread = threading.Thread(target=check_state)
+        thread.daemon = True
+        thread.start()
+
     def open_about(self):
         print('About button has been pressed')
 
@@ -219,10 +250,9 @@ class ExpressionSection(tk.Frame):
                                            "./components/graphical_components/material_panel/expression_section.png")
         self.background = tk.Label(self, image=self.background_image)
         self.background.place(relwidth=1, relheight=1)
-        #self.pack(side="left")
+        # self.pack(side="left")
 
 
 if __name__ == "__main__":
     app = MainPanel()
     app.mainloop()
-
