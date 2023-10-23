@@ -294,6 +294,46 @@ class ExpressionSection(tk.Frame):
         self.background.place(relwidth=1, relheight=1)
         #self.pack(side="left")
 
+        self.next_one_button_bg = PhotoImage(file=
+                                             "./components/graphical_components/material_panel/next_one_button.png")
+        self.switch_button_bg = PhotoImage(file="./components/graphical_components/material_panel/switch_button.png")
+        self.file_upload_bg = PhotoImage(file="./components/graphical_components/material_panel/file_upload.png")
+        self.blank_button_bg = PhotoImage(file="./components/graphical_components/material_panel/blank_button.png")
+        self.confirm_button_bg = PhotoImage(file="./components/graphical_components/material_panel/confirm_button.png")
+
+        self.word_entry = tk.Entry(self, width=32, background="#7eaa92", fg="white", bd=0, justify="center",
+                                   font=("Arial", 16))
+        self.word_entry.place(x=210, y=164)
+
+        self.translation_entry = tk.Entry(self, width=32, background="#7eaa92", fg="white", bd=0, justify="center",
+                                          font=("Arial", 16))
+        self.translation_entry.place(x=210, y=264)
+
+        self.next_one = tk.Button(self, command=self.switch_panel_frame, image=self.next_one_button_bg, bd=0,
+                                  background='#9ed2be', highlightthickness=0)
+        self.next_one.place(x=314, y=328)
+
+        self.switch_button = tk.Button(self, command=lambda: master.show_frame("word_frame"),
+                                       image=self.switch_button_bg, bd=0, background='#9ed2be', highlightthickness=0)
+        self.switch_button.place(x=425, y=416)
+
+        self.upload_button = tk.Button(self, command=self.switch_panel_frame,
+                                       image=self.file_upload_bg, bd=0, background='#9ed2be', highlightthickness=0)
+        self.upload_button.place(x=75, y=573)
+
+        self.safe_as_label = tk.Entry(self, width=19, background="#7eaa92", fg="white", bd=0, justify="center",
+                                      font=("Arial", 12))
+        self.safe_as_label.place(x=448, y=569)
+        self.safe_as_label.configure(takefocus=False)
+
+        self.safe_as_button = tk.Button(self, command=self.switch_panel_frame,
+                                        image=self.confirm_button_bg, bd=0, background='#9ed2be', highlightthickness=0)
+        self.safe_as_button.place(x=442, y=609)
+
+    def switch_panel_frame(self):
+        pass
+
+
 
 
 
