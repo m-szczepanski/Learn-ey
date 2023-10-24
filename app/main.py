@@ -5,6 +5,8 @@ import json
 from app.components.pomodoro_settings import PomodoroSettings
 import threading
 import time
+from functions.safe_inserted_values import safe_session_data
+from functions.safe_session import save_data
 
 BACKGROUND = "#cde3b6"
 repetitions = 0
@@ -243,6 +245,9 @@ class WordFrame(tk.Frame):
         self.background.place(relwidth=1, relheight=1)
         self.pack(side="left")
 
+        self.words = []
+        self.translations = []
+
         self.next_one_button_bg = PhotoImage(file=
                                              "./components/graphical_components/material_panel/next_one_button.png")
         self.switch_button_bg = PhotoImage(file="./components/graphical_components/material_panel/switch_button.png")
@@ -258,7 +263,7 @@ class WordFrame(tk.Frame):
                                           font=("Arial", 16))
         self.translation_entry.place(x=210, y=264)
 
-        self.next_one = tk.Button(self, command=self.switch_panel_frame, image=self.next_one_button_bg, bd=0,
+        self.next_one = tk.Button(self, command=self.append_arrays, image=self.next_one_button_bg, bd=0,
                                   background='#9ed2be', highlightthickness=0)
         self.next_one.place(x=314, y=328)
 
@@ -275,13 +280,27 @@ class WordFrame(tk.Frame):
         self.safe_as_label.place(x=448, y=569)
         self.safe_as_label.configure(takefocus=False)
 
-        self.safe_as_button = tk.Button(self, command=self.switch_panel_frame,
+        self.safe_as_button = tk.Button(self, command=self.safe_session,
                                        image=self.confirm_button_bg, bd=0, background='#9ed2be', highlightthickness=0)
         self.safe_as_button.place(x=442, y=609)
 
-
     def switch_panel_frame(self):
         pass
+
+    def safe_session(self):
+        session_name = self.safe_as_label.get()
+        save_data(self.words, self.translations, session_name)
+        self.safe_as_label.delete(0, 'end')
+
+    def append_arrays(self):
+        x = self.word_entry.get()
+        self.words.append(x)
+        y = self.translation_entry.get()
+        self.translations.append(y)
+        print(self.words, self.translations)
+        self.word_entry.delete(0, 'end')
+        self.translation_entry.delete(0, 'end')
+
 
 class ExpressionSection(tk.Frame):
     def __init__(self, master=None):
@@ -332,8 +351,6 @@ class ExpressionSection(tk.Frame):
 
     def switch_panel_frame(self):
         pass
-
-
 
 
 
