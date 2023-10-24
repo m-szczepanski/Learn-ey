@@ -276,12 +276,12 @@ class WordFrame(tk.Frame):
         self.upload_button.place(x=75, y=573)
 
         self.safe_as_label = tk.Entry(self, width=19, background="#7eaa92", fg="white", bd=0, justify="center",
-                                   font=("Arial", 12))
+                                      font=("Arial", 12))
         self.safe_as_label.place(x=448, y=569)
         self.safe_as_label.configure(takefocus=False)
 
-        self.safe_as_button = tk.Button(self, command=self.safe_session,
-                                       image=self.confirm_button_bg, bd=0, background='#9ed2be', highlightthickness=0)
+        self.safe_as_button = tk.Button(self, command=self.safe_session, image=self.confirm_button_bg, bd=0,
+                                        background='#9ed2be', highlightthickness=0)
         self.safe_as_button.place(x=442, y=609)
 
     def switch_panel_frame(self):
@@ -313,6 +313,9 @@ class ExpressionSection(tk.Frame):
         self.background.place(relwidth=1, relheight=1)
         #self.pack(side="left")
 
+        self.expressions = []
+        self.definitions = []
+
         self.next_one_button_bg = PhotoImage(file=
                                              "./components/graphical_components/material_panel/next_one_button.png")
         self.switch_button_bg = PhotoImage(file="./components/graphical_components/material_panel/switch_button.png")
@@ -320,15 +323,15 @@ class ExpressionSection(tk.Frame):
         self.blank_button_bg = PhotoImage(file="./components/graphical_components/material_panel/blank_button.png")
         self.confirm_button_bg = PhotoImage(file="./components/graphical_components/material_panel/confirm_button.png")
 
-        self.word_entry = tk.Entry(self, width=32, background="#7eaa92", fg="white", bd=0, justify="center",
+        self.expression_entry = tk.Entry(self, width=32, background="#7eaa92", fg="white", bd=0, justify="center",
                                    font=("Arial", 16))
-        self.word_entry.place(x=210, y=164)
+        self.expression_entry.place(x=210, y=164)
 
-        self.translation_entry = tk.Entry(self, width=32, background="#7eaa92", fg="white", bd=0, justify="center",
+        self.definition_entry = tk.Entry(self, width=32, background="#7eaa92", fg="white", bd=0, justify="center",
                                           font=("Arial", 16))
-        self.translation_entry.place(x=210, y=264)
+        self.definition_entry.place(x=210, y=264)
 
-        self.next_one = tk.Button(self, command=self.switch_panel_frame, image=self.next_one_button_bg, bd=0,
+        self.next_one = tk.Button(self, command=self.append_arrays, image=self.next_one_button_bg, bd=0,
                                   background='#9ed2be', highlightthickness=0)
         self.next_one.place(x=314, y=328)
 
@@ -345,13 +348,26 @@ class ExpressionSection(tk.Frame):
         self.safe_as_label.place(x=448, y=569)
         self.safe_as_label.configure(takefocus=False)
 
-        self.safe_as_button = tk.Button(self, command=self.switch_panel_frame,
+        self.safe_as_button = tk.Button(self, command=self.safe_session,
                                         image=self.confirm_button_bg, bd=0, background='#9ed2be', highlightthickness=0)
         self.safe_as_button.place(x=442, y=609)
 
     def switch_panel_frame(self):
         pass
 
+    def safe_session(self):
+        session_name = self.safe_as_label.get()
+        save_data(self.expressions, self.definitions, session_name)
+        self.safe_as_label.delete(0, 'end')
+
+    def append_arrays(self):
+        x = self.expression_entry.get()
+        self.expressions.append(x)
+        y = self.definition_entry.get()
+        self.definitions.append(y)
+        print(self.expressions, self.definitions)
+        self.expression_entry.delete(0, 'end')
+        self.definition_entry.delete(0, 'end')
 
 
 if __name__ == "__main__":
