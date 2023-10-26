@@ -7,6 +7,8 @@ import threading
 import time
 from functions.safe_inserted_values import safe_session_data
 from functions.safe_session import save_data
+from functions.get_file_path import get_file_path
+from functions.get_data_from_file import fetch_data
 
 BACKGROUND = "#cde3b6"
 repetitions = 0
@@ -271,7 +273,7 @@ class WordFrame(tk.Frame):
                                        image=self.switch_button_bg, bd=0, background='#9ed2be', highlightthickness=0)
         self.switch_button.place(x=425, y=416)
 
-        self.upload_button = tk.Button(self, command=self.switch_panel_frame,
+        self.upload_button = tk.Button(self, command=self.get_data_from_file,
                                        image=self.file_upload_bg, bd=0, background='#9ed2be', highlightthickness=0)
         self.upload_button.place(x=75, y=573)
 
@@ -286,6 +288,10 @@ class WordFrame(tk.Frame):
 
     def switch_panel_frame(self):
         pass
+
+    def get_data_from_file(self):
+        file_path = get_file_path()
+        self.words, self.translations = fetch_data(file_path)
 
     def safe_session(self):
         session_name = self.safe_as_label.get()
@@ -311,7 +317,6 @@ class ExpressionSection(tk.Frame):
                                            "./components/graphical_components/material_panel/expression_section.png")
         self.background = tk.Label(self, image=self.background_image)
         self.background.place(relwidth=1, relheight=1)
-        #self.pack(side="left")
 
         self.expressions = []
         self.definitions = []
@@ -339,7 +344,7 @@ class ExpressionSection(tk.Frame):
                                        image=self.switch_button_bg, bd=0, background='#9ed2be', highlightthickness=0)
         self.switch_button.place(x=425, y=416)
 
-        self.upload_button = tk.Button(self, command=self.switch_panel_frame,
+        self.upload_button = tk.Button(self, command=self.get_data_from_file,
                                        image=self.file_upload_bg, bd=0, background='#9ed2be', highlightthickness=0)
         self.upload_button.place(x=75, y=573)
 
@@ -354,6 +359,10 @@ class ExpressionSection(tk.Frame):
 
     def switch_panel_frame(self):
         pass
+
+    def get_data_from_file(self):
+        file_path = get_file_path()
+        self.expressions, self.definitions = fetch_data(file_path)
 
     def safe_session(self):
         session_name = self.safe_as_label.get()
