@@ -37,7 +37,6 @@ class PomodoroSettings:
         short_break_min = self.short_break_entry.get()
         long_break_min = self.long_break_entry.get()
 
-
         new_values = {
             "WORK_MIN": int(work_min),
             "SHORT_BREAK_MIN": int(short_break_min),
