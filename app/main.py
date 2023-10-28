@@ -5,7 +5,6 @@ import json
 from app.components.pomodoro_settings import PomodoroSettings
 import threading
 import time
-from functions.safe_inserted_values import safe_session_data
 from functions.safe_session import save_data
 from functions.get_file_path import get_file_path
 from functions.get_data_from_file import fetch_data
