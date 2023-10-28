@@ -5,10 +5,11 @@ import json
 from app.components.pomodoro_settings import PomodoroSettings
 import threading
 import time
-from functions.safe_inserted_values import safe_session_data
 from functions.safe_session import save_data
 from functions.get_file_path import get_file_path
 from functions.get_data_from_file import fetch_data
+from tkinter import messagebox
+import os
 
 BACKGROUND = "#cde3b6"
 repetitions = 0
@@ -295,17 +296,25 @@ class WordFrame(tk.Frame):
 
     def safe_session(self):
         session_name = self.safe_as_label.get()
-        save_data(self.words, self.translations, session_name)
-        self.safe_as_label.delete(0, 'end')
+        data_directory = "data/session_data"
+        file_path = os.path.join(data_directory, f"{session_name}.json")
+        if os.path.exists(file_path):
+            messagebox.showinfo("Session name error", "Session with this name exists. Chose another name.")
+            self.safe_as_label.delete(0, 'end')
+        else:
+            save_data(self.words, self.translations, session_name)
+            self.safe_as_label.delete(0, 'end')
+
 
     def append_arrays(self):
         x = self.word_entry.get()
-        self.words.append(x)
         y = self.translation_entry.get()
-        self.translations.append(y)
-        print(self.words, self.translations)
-        self.word_entry.delete(0, 'end')
-        self.translation_entry.delete(0, 'end')
+        if x != '' or y != '':
+            self.words.append(x)
+            self.translations.append(y)
+            print(self.words, self.translations)
+            self.word_entry.delete(0, 'end')
+            self.translation_entry.delete(0, 'end')
 
 
 class ExpressionSection(tk.Frame):
@@ -366,17 +375,24 @@ class ExpressionSection(tk.Frame):
 
     def safe_session(self):
         session_name = self.safe_as_label.get()
-        save_data(self.expressions, self.definitions, session_name)
-        self.safe_as_label.delete(0, 'end')
+        data_directory = "data/session_data"
+        file_path = os.path.join(data_directory, f"{session_name}.json")
+        if os.path.exists(file_path):
+            messagebox.showinfo("Session name error", "Session with this name exists. Chose another name.")
+            self.safe_as_label.delete(0, 'end')
+        else:
+            save_data(self.expressions, self.definitions, session_name)
+            self.safe_as_label.delete(0, 'end')
 
     def append_arrays(self):
         x = self.expression_entry.get()
-        self.expressions.append(x)
         y = self.definition_entry.get()
-        self.definitions.append(y)
-        print(self.expressions, self.definitions)
-        self.expression_entry.delete(0, 'end')
-        self.definition_entry.delete(0, 'end')
+        if x != '' or y != '':
+            self.expressions.append(x)
+            self.definitions.append(y)
+            print(self.expressions, self.definitions)
+            self.expression_entry.delete(0, 'end')
+            self.definition_entry.delete(0, 'end')
 
 
 if __name__ == "__main__":
