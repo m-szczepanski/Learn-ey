@@ -10,6 +10,9 @@ from functions.get_file_path import get_file_path
 from functions.get_data_from_file import fetch_data
 from tkinter import messagebox
 import os
+from functions.check_session_number import list_files_in_directory
+from functions.get_session_date import get_file_creation_time
+from functions.delete_session import delete_session
 
 BACKGROUND = "#cde3b6"
 repetitions = 0
@@ -42,6 +45,7 @@ class MainPanel(tk.Tk):
         if frame := self.frames.get(frame_name):
             if frame_name == 'left_frame':
                 self.frames["right_frame"].set_main_panel_button_visibility(False)
+                self.frames["left_frame"].update_top_panel()
             if frame_name == 'right_frame':
                 frame.pack(side="right", fill='y')
             else:
@@ -76,14 +80,66 @@ class LeftFrame(tk.Frame):
         self.pack(side="left")
 
         # top panel
-        panels_position_x = [255, 463, 47, 255, 463]
-        panels_position_y = [47, 57, 217, 217, 217]
         self.new_session_button_bg = (
             PhotoImage(file="./components/graphical_components/main_panel/add_session_button.png"))
-
+        self.session_bg = PhotoImage(file="./components/graphical_components/main_panel/session_bg.png")
+        self.session_delete_bg = PhotoImage(file="components/graphical_components/main_panel/delete_session.png")
+        self.blank_session_bg = PhotoImage(file="components/graphical_components/main_panel/blank_session_panel.png")
         self.new_session_button = tk.Button(self, command=lambda: master.show_frame("word_frame"),
                                             image=self.new_session_button_bg, bd=0, background='#9ed2be')
         self.new_session_button.place(x=50, y=42)
+
+    def update_top_panel(self):
+        saved_sessions = list_files_in_directory()
+        self.populate_session_panel(saved_sessions)
+
+        print(list_files_in_directory())  # debug
+
+    def populate_session_panel(self, saved_sessions):
+        panels_position_x = [255, 463, 47, 255, 463]
+        panels_position_y = [42, 42, 211, 211, 211]
+        #panels_date_position_x = [310, 528, 104, 311, 517]
+        panels_date_position_y = [168, 168, 337, 337, 337]
+        panels_name_position_x = [292, 499, 82, 293, 501]
+        panels_name_position_y = [95, 95, 262, 262, 262]
+        #panels_delete_button_position_x = [420, 632, 211, 420, 632]
+        panels_delete_button_position_y = [49, 49, 218, 218, 218]
+        print("saved sessions: ", saved_sessions)
+
+        sessions_number = len(saved_sessions)
+        print(sessions_number)
+
+        for i, session in enumerate(saved_sessions):
+            session_label = tk.Label(self, image=self.session_bg, background="#9ed2be", bd=0)
+            session_label.place(x=panels_position_x[i], y=panels_position_y[i])
+            session_name = tk.Label(self, background="#7EAA92", font=('Inter', 30, "bold"), fg="#FFD9B7", bd=0,
+                                    text=session[:-5])
+            session_name.place(x=panels_name_position_x[i], y=panels_name_position_y[i])
+            session_date = get_file_creation_time(saved_sessions[i])
+            session_date_panel = tk.Label(self, background="#7eaa92", bd=0, font=('Inter', 10, "normal"), fg="#ffffff",
+                                          text=session_date)
+            session_date_panel.place(x=panels_position_x[i] + 60, y=panels_date_position_y[i])
+            session_delete_button = tk.Button(self, image=self.session_delete_bg, background="#7eaa92", bd=0,
+                                              command=lambda session=session: self.delete_session(session))
+            session_delete_button.place(x=panels_position_x[i] + 158, y=panels_delete_button_position_y[i])
+
+            print(session_date)
+            while sessions_number < 5:
+                session_label = tk.Label(self, image=self.blank_session_bg, background="#9ed2be", bd=0)
+                session_label.place(x=panels_position_x[sessions_number], y=panels_position_y[sessions_number])
+                sessions_number += 1
+
+    def delete_session(self, session_name):
+        if confirmation := messagebox.askyesno(
+                "Delete session",
+                f"Are you sure you want to delete this " f"session: {session_name[:-5]}?",
+        ):
+            delete_session(session_name)
+            messagebox.showinfo("Success", f"{session_name[:-5]} has been deleted.")
+
+        else:
+            messagebox.showinfo("Info", f"{session_name[:-5]} has not been deleted.")
+        self.update_top_panel()
 
     def forget(self):
         self.pack_forget()
