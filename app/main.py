@@ -93,21 +93,15 @@ class LeftFrame(tk.Frame):
         saved_sessions = list_files_in_directory()
         self.populate_session_panel(saved_sessions)
 
-        print(list_files_in_directory())  # debug
-
     def populate_session_panel(self, saved_sessions):
         panels_position_x = [255, 463, 47, 255, 463]
         panels_position_y = [42, 42, 211, 211, 211]
-        #panels_date_position_x = [310, 528, 104, 311, 517]
         panels_date_position_y = [168, 168, 337, 337, 337]
         panels_name_position_x = [292, 499, 82, 293, 501]
         panels_name_position_y = [95, 95, 262, 262, 262]
-        #panels_delete_button_position_x = [420, 632, 211, 420, 632]
         panels_delete_button_position_y = [49, 49, 218, 218, 218]
-        print("saved sessions: ", saved_sessions)
 
         sessions_number = len(saved_sessions)
-        print(sessions_number)
 
         for i, session in enumerate(saved_sessions):
             session_label = tk.Label(self, image=self.session_bg, background="#9ed2be", bd=0)
@@ -123,7 +117,6 @@ class LeftFrame(tk.Frame):
                                               command=lambda session=session: self.delete_session(session))
             session_delete_button.place(x=panels_position_x[i] + 158, y=panels_delete_button_position_y[i])
 
-            print(session_date)
             while sessions_number < 5:
                 session_label = tk.Label(self, image=self.blank_session_bg, background="#9ed2be", bd=0)
                 session_label.place(x=panels_position_x[sessions_number], y=panels_position_y[sessions_number])
