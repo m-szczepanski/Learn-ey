@@ -1,4 +1,5 @@
 import json
+from tkinter import messagebox
 
 
 def safe_session_data(data1, data2, session_name):
@@ -8,3 +9,5 @@ def safe_session_data(data1, data2, session_name):
     data = dict(zip(data1, data2))
     with open(f"./data/session_data/{session_name}.json", 'w') as json_file:
         json.dump(data, json_file, ensure_ascii=False, indent=4)
+
+    messagebox.showinfo("Session saved", f"{session_name[:-5]} has been saved as a session.")
