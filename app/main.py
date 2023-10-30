@@ -37,6 +37,7 @@ class MainPanel(tk.Tk):
         self.frames["right_frame"] = RightFrame(self)
         self.frames["word_frame"] = WordFrame(self)
         self.frames["expression_frame"] = ExpressionSection(self)
+        self.frames["full_word_list"] = FullWordList(self)
 
         self.open_initial_frames()
         self.frames["right_frame"].set_main_panel_button_visibility(False)
@@ -89,9 +90,38 @@ class LeftFrame(tk.Frame):
                                             image=self.new_session_button_bg, bd=0, background='#9ed2be')
         self.new_session_button.place(x=50, y=42)
 
+        # bottom panel
+        self.full_list_bg = PhotoImage(file="components/graphical_components/main_panel/full_list_button.png")
+        self.full_list = tk.Button(self, image=self.full_list_bg, command=lambda: master.show_frame("full_word_list"),
+                                   bd=0, bg="#9ed2be", width=188, height=62)
+        self.full_list.place(x=468, y=569)
+
+        self.german_button = tk.Button(self, text="German", font=('Inter', 18, "bold"), background="#7eaa92",
+                                       fg="#FFD9B7", bd=0, width=11)
+        self.german_button.place(x=61, y=487)
+
+        self.polish_button = tk.Button(self, text="Polish", font=('Inter', 18, "bold"), background="#7eaa92",
+                                       fg="#FFD9B7", bd=0, width=11)
+        self.polish_button.place(x=270, y=487)
+
+        self.spanish_button = tk.Button(self, text="Spanish", font=('Inter', 18, "bold"), background="#7eaa92",
+                                        fg="#FFD9B7", bd=0, width=11)
+        self.spanish_button.place(x=478, y=487)
+
+        self.norwegian_button = tk.Button(self, text="Norwegian", font=('Inter', 18, "bold"), background="#7eaa92",
+                                          fg="#FFD9B7", bd=0, width=11)
+        self.norwegian_button.place(x=60, y=577)
+
+        self.esperanto_button = tk.Button(self, text="Esperanto", font=('Inter', 18, "bold"), background="#7eaa92",
+                                          fg="#FFD9B7", bd=0, width=11)
+        self.esperanto_button.place(x=268, y=577)
+
     def update_top_panel(self):
-        saved_sessions = list_files_in_directory()
+        saved_sessions = list_files_in_directory("./data/session_data", 5)
         self.populate_session_panel(saved_sessions)
+
+    def open_full_list(self):
+        pass
 
     def populate_session_panel(self, saved_sessions):
         panels_position_x = [255, 463, 47, 255, 463]
@@ -442,6 +472,37 @@ class ExpressionSection(tk.Frame):
             print(self.expressions, self.definitions)
             self.expression_entry.delete(0, 'end')
             self.definition_entry.delete(0, 'end')
+
+
+class FullWordList(tk.Frame):
+    def __init__(self, master=None):
+        super().__init__(master)
+        self.master = master
+        self.configure(width=696, height=698)
+        self.background_image = PhotoImage(file=
+                                           "./components/graphical_components/material_panel/language_full_list.png")
+        self.background = tk.Label(self, image=self.background_image)
+        self.background.place(relwidth=1, relheight=1)
+        self.create_buttons()
+
+    def create_buttons(self):
+        button_width = 11
+        button_height = 1
+        x_pos = [90, 285, 485]
+        y_pos = [236, 296, 359, 418, 480, 541, 601]
+        languages = list_files_in_directory("./data/words", 30)
+
+        language_index = 0
+        for row in range(7):
+            for column in range(3):
+
+                button = tk.Button(self, background="#7EAA92", fg="#FFD9B7", bd=0, width=button_width,
+                                   height=button_height, text=languages[language_index][:-5], font=('Inter', 12, "bold"))
+                button.place(x=x_pos[column], y=y_pos[row])
+                language_index += 1
+
+                if language_index >= len(languages):
+                    break
 
 
 if __name__ == "__main__":
