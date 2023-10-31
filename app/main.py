@@ -495,9 +495,9 @@ class FullWordList(tk.Frame):
         language_index = 0
         for row in range(7):
             for column in range(3):
-
+                language_name = languages[language_index][:-5].capitalize()
                 button = tk.Button(self, background="#7EAA92", fg="#FFD9B7", bd=0, width=button_width,
-                                   height=button_height, text=languages[language_index][:-5], font=('Inter', 12, "bold"))
+                                   height=button_height, text=language_name, font=('Inter', 12, "bold"))
                 button.place(x=x_pos[column], y=y_pos[row])
                 language_index += 1
 
