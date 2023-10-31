@@ -7,7 +7,8 @@ import threading
 import time
 from functions.safe_session import save_data
 from functions.get_file_path import get_file_path
-from functions.get_data_from_file import fetch_data
+from functions.get_data_from_json_file import fetch_json_data
+from functions.get_data_from_csv_file import fetch_csv_data
 from tkinter import messagebox
 import os
 from functions.check_session_number import list_files_in_directory
@@ -371,7 +372,13 @@ class WordFrame(tk.Frame):
 
     def get_data_from_file(self):
         file_path = get_file_path()
-        self.words, self.translations = fetch_data(file_path)
+        print(file_path)
+        if file_path.endswith(".json"):
+            self.words, self.translations = fetch_json_data(file_path)
+        elif file_path.endswith(".csv"):
+            self.words, self.translations = fetch_csv_data(file_path)
+        else:
+            print("File path is not supported. Chose either csv or json.")
 
     def safe_session(self):
         session_name = self.safe_as_label.get()
@@ -450,7 +457,13 @@ class ExpressionSection(tk.Frame):
 
     def get_data_from_file(self):
         file_path = get_file_path()
-        self.expressions, self.definitions = fetch_data(file_path)
+        print(file_path)
+        if file_path.endswith(".json"):
+            self.words, self.translations = fetch_json_data(file_path)
+        elif file_path.endswith(".csv"):
+            self.words, self.translations = fetch_csv_data(file_path)
+        else:
+            print("File path is not supported. Chose either csv or json.")
 
     def safe_session(self):
         session_name = self.safe_as_label.get()
