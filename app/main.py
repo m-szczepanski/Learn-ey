@@ -39,6 +39,7 @@ class MainPanel(tk.Tk):
         self.frames["word_frame"] = WordFrame(self)
         self.frames["expression_frame"] = ExpressionSection(self)
         self.frames["full_word_list"] = FullWordList(self)
+        self.frames["flashcard_frame"] = Flashcard(self)
 
         self.open_initial_frames()
         self.frames["right_frame"].set_main_panel_button_visibility(False)
@@ -471,10 +472,10 @@ class ExpressionSection(tk.Frame):
         file_path = os.path.join(data_directory, f"{session_name}.json")
         if os.path.exists(file_path):
             messagebox.showinfo("Session name error", "Session with this name exists. Chose another name.")
-            self.safe_as_label.delete(0, 'end')
         else:
             save_data(self.expressions, self.definitions, session_name)
-            self.safe_as_label.delete(0, 'end')
+
+        self.safe_as_label.delete(0, 'end')
 
     def append_arrays(self):
         x = self.expression_entry.get()
@@ -510,12 +511,53 @@ class FullWordList(tk.Frame):
             for column in range(3):
                 language_name = languages[language_index][:-5].capitalize()
                 button = tk.Button(self, background="#7EAA92", fg="#FFD9B7", bd=0, width=button_width,
-                                   height=button_height, text=language_name, font=('Inter', 12, "bold"))
+                                   height=button_height, text=language_name, font=('Inter', 12, "bold"),
+                                   command=lambda: self.master.show_frame("flashcard_frame"))
                 button.place(x=x_pos[column], y=y_pos[row])
                 language_index += 1
 
                 if language_index >= len(languages):
                     break
+
+
+class Flashcard(tk.Frame):
+    def __init__(self, master=None):
+        super().__init__(master)
+        self.master = master
+        self.configure(width=696, height=698)
+        self.background_image = PhotoImage(file=
+                                           "./components/graphical_components/flashcard/flashcard_panel.png")
+        self.background = tk.Label(self, image=self.background_image)
+        self.background.place(relwidth=1, relheight=1)
+
+        self.flashcard_front_bg = PhotoImage(file="components/graphical_components/flashcard/flashcard_front.png")
+        self.flashcard_back_bg = PhotoImage(file="components/graphical_components/flashcard/flashcard_back.png")
+        self.flip_button_bg = PhotoImage(file="components/graphical_components/flashcard/flip_button.png")
+        self.canvas_background = PhotoImage(file="components/graphical_components/flashcard/canvas_bg.png")
+        self.yes_button_bg = PhotoImage(file="components/graphical_components/flashcard/yes_button.png")
+        self.no_button_bg = PhotoImage(file="components/graphical_components/flashcard/no_button.png")
+
+        self.canvas = tk.Canvas(self, width=616, height=311, bg="#7EAA92", highlightthickness=0)
+        self.canvas_bg = self.canvas.create_image(300, 200, anchor=tk.NW, image=self.flashcard_front_bg)
+        card_language = self.canvas.create_text(300, 50, text="Language", font=("Inter", 30, "normal"), fill="#FFD9B7")
+        card_word = self.canvas.create_text(300, 163, text="word", font=("Inter", 80, "bold"), fill="#FFFFFF")
+        self.canvas.place(x=47, y=62)
+
+        self.flip_button = tk.Button(self, image=self.flip_button_bg, command=self.next_card, bd=0, bg="#9ED2BE")
+        self.flip_button.place(x=254, y=406)
+        self.unknown_button = tk.Button(self, image=self.no_button_bg, command=self.next_card, bd=0, bg="#9ED2BE")
+        self.unknown_button.place(x=86, y=501)
+
+        self.known_button = tk.Button(self, image=self.yes_button_bg, command=self.next_card, bd=0, bg="#9ED2BE")
+        self.known_button.place(x=465, y=501)
+
+
+    def next_card(self):
+        pass
+
+
+
+
 
 
 if __name__ == "__main__":
