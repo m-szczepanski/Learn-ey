@@ -1,6 +1,7 @@
 import json
 
 
+
 def pass_session_data(session_type, file_path):
     file_name = str(file_path).lower()
     real_path = f"./data/words/{file_name}.csv"

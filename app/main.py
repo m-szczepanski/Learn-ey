@@ -14,6 +14,11 @@ import os
 from functions.check_session_number import list_files_in_directory
 from functions.get_session_date import get_file_creation_time
 from functions.delete_session import delete_session
+import pandas as pd
+import random
+import csv
+from functions.pass_session_data import pass_session_data
+from functions.clear_session_data import clear_json_file
 
 BACKGROUND = "#cde3b6"
 repetitions = 0
@@ -32,6 +37,8 @@ class MainPanel(tk.Tk):
         self.background.place(relwidth=1, relheight=1)
         self.current_left_frame = None
 
+        clear_json_file("./data/temporary_data/session.json")
+
         self.frames = {}
 
         self.frames["left_frame"] = LeftFrame(self)
@@ -46,6 +53,9 @@ class MainPanel(tk.Tk):
 
     def show_frame(self, frame_name):
         if frame := self.frames.get(frame_name):
+            if frame_name == 'flashcard_frame':
+                self.frames['flashcard_frame'].check_language()
+
             if frame_name == 'left_frame':
                 self.frames["right_frame"].set_main_panel_button_visibility(False)
                 self.frames["left_frame"].update_top_panel()
@@ -57,7 +67,7 @@ class MainPanel(tk.Tk):
 
             frame.tkraise()
 
-            self.frames['right_frame'].monitor_button_state()
+            #self.frames['right_frame'].monitor_button_state()
 
             if self.current_left_frame:
                 self.current_left_frame.forget()
@@ -99,23 +109,36 @@ class LeftFrame(tk.Frame):
         self.full_list.place(x=468, y=569)
 
         self.german_button = tk.Button(self, text="German", font=('Inter', 18, "bold"), background="#7eaa92",
-                                       fg="#FFD9B7", bd=0, width=11)
+                                       fg="#FFD9B7", bd=0, width=11,
+                                       command=lambda: pass_session_data("language", "german"))
         self.german_button.place(x=61, y=487)
 
         self.polish_button = tk.Button(self, text="Polish", font=('Inter', 18, "bold"), background="#7eaa92",
-                                       fg="#FFD9B7", bd=0, width=11)
+                                       fg="#FFD9B7", bd=0, width=11,
+                                       command=lambda: pass_session_data("language",
+                                                                         "polish")
+                                       )
         self.polish_button.place(x=270, y=487)
 
         self.spanish_button = tk.Button(self, text="Spanish", font=('Inter', 18, "bold"), background="#7eaa92",
-                                        fg="#FFD9B7", bd=0, width=11)
+                                        fg="#FFD9B7", bd=0, width=11,
+                                        command=lambda: pass_session_data("language",
+                                                                          "spanish")
+                                        )
         self.spanish_button.place(x=478, y=487)
 
         self.norwegian_button = tk.Button(self, text="Norwegian", font=('Inter', 18, "bold"), background="#7eaa92",
-                                          fg="#FFD9B7", bd=0, width=11)
+                                          fg="#FFD9B7", bd=0, width=11,
+                                          command=lambda: pass_session_data("language",
+                                                                            "norwegian")
+                                          )
         self.norwegian_button.place(x=60, y=577)
 
         self.esperanto_button = tk.Button(self, text="Esperanto", font=('Inter', 18, "bold"), background="#7eaa92",
-                                          fg="#FFD9B7", bd=0, width=11)
+                                          fg="#FFD9B7", bd=0, width=11,
+                                          command=lambda: pass_session_data("language",
+                                                                            "esperanto")
+                                          )
         self.esperanto_button.place(x=268, y=577)
 
     def update_top_panel(self):
@@ -135,7 +158,7 @@ class LeftFrame(tk.Frame):
 
         sessions_number = len(saved_sessions)
 
-        for i, session in enumerate(saved_sessions):
+        for i, session in saved_sessions:
             session_label = tk.Label(self, image=self.session_bg, background="#9ed2be", bd=0)
             session_label.place(x=panels_position_x[i], y=panels_position_y[i])
             session_name = tk.Label(self, background="#7EAA92", font=('Inter', 30, "bold"), fg="#FFD9B7", bd=0,
@@ -233,7 +256,7 @@ class RightFrame(tk.Frame):
                                      highlightthickness=0, highlightbackground='#cde3b6')
         self.quit_button.place(x=38, y=602)
 
-        self.monitor_button_state()
+        #self.monitor_button_state()
 
     def count_down(self, count):
         global num_of_ticks
@@ -297,26 +320,28 @@ class RightFrame(tk.Frame):
         if self.main_panel_button_enabled:
             self.master.show_frame("left_frame")
             self.set_main_panel_button_visibility(False)
+            clear_json_file("./data/temporary_data/session.json")
 
     def set_main_panel_button_visibility(self, value):
         self.main_panel_button_enabled = value
 
-    def monitor_button_state(self):
-        def check_state():
-            while True:
-                self.main_panel_button.config(state="normal") if self.main_panel_button_enabled else (
-                    self.main_panel_button.config(state="disabled"))
-                time.sleep(0.5)
-
-        thread = threading.Thread(target=check_state)
-        thread.daemon = True
-        thread.start()
+    # def monitor_button_state(self):
+    #     def check_state():
+    #         while True:
+    #             self.main_panel_button.config(state="normal") if self.main_panel_button_enabled else (
+    #                 self.main_panel_button.config(state="disabled"))
+    #             time.sleep(0.5)
+    #
+    #     thread = threading.Thread(target=check_state)
+    #     thread.daemon = True
+    #     thread.start()
 
 
     def open_about(self):
         print('About button has been pressed')
 
     def quit_app(self):
+        clear_json_file("./data/temporary_data/session.json")
         self.master.destroy()
 
 
@@ -391,7 +416,6 @@ class WordFrame(tk.Frame):
         else:
             save_data(self.words, self.translations, session_name)
             self.safe_as_label.delete(0, 'end')
-
 
     def append_arrays(self):
         x = self.word_entry.get()
@@ -509,15 +533,18 @@ class FullWordList(tk.Frame):
         language_index = 0
         for row in range(7):
             for column in range(3):
-                language_name = languages[language_index][:-5].capitalize()
+                language_name = languages[language_index][:-4].capitalize()
                 button = tk.Button(self, background="#7EAA92", fg="#FFD9B7", bd=0, width=button_width,
                                    height=button_height, text=language_name, font=('Inter', 12, "bold"),
-                                   command=lambda: self.master.show_frame("flashcard_frame"))
+                                   command=lambda lang=language_name: pass_session_data("languages", lang))
                 button.place(x=x_pos[column], y=y_pos[row])
                 language_index += 1
 
                 if language_index >= len(languages):
                     break
+
+        self.master.show_frame("flashcard_frame")
+        #Flashcard.check_language()
 
 
 class Flashcard(tk.Frame):
@@ -530,6 +557,8 @@ class Flashcard(tk.Frame):
         self.background = tk.Label(self, image=self.background_image)
         self.background.place(relwidth=1, relheight=1)
 
+        self.language = ''
+
         self.flashcard_front_bg = PhotoImage(file="components/graphical_components/flashcard/flashcard_front.png")
         self.flashcard_back_bg = PhotoImage(file="components/graphical_components/flashcard/flashcard_back.png")
         self.flip_button_bg = PhotoImage(file="components/graphical_components/flashcard/flip_button.png")
@@ -539,26 +568,96 @@ class Flashcard(tk.Frame):
 
         self.canvas = tk.Canvas(self, width=616, height=311, bg="#7EAA92", highlightthickness=0)
         self.canvas_bg = self.canvas.create_image(300, 200, anchor=tk.NW, image=self.flashcard_front_bg)
-        card_language = self.canvas.create_text(300, 50, text="Language", font=("Inter", 30, "normal"), fill="#FFD9B7")
-        card_word = self.canvas.create_text(300, 163, text="word", font=("Inter", 80, "bold"), fill="#FFFFFF")
+        self.card_language = self.canvas.create_text(300, 50, text="Language", font=("Inter", 30, "normal"),
+                                                     fill="#FFD9B7")
+        self.card_word = self.canvas.create_text(300, 163, text="word", font=("Inter", 80, "bold"), fill="#FFFFFF")
         self.canvas.place(x=47, y=62)
 
-        self.flip_button = tk.Button(self, image=self.flip_button_bg, command=self.next_card, bd=0, bg="#9ED2BE")
+        self.flip_button = tk.Button(self, image=self.flip_button_bg, command=self.flip_card, bd=0, bg="#9ED2BE")
         self.flip_button.place(x=254, y=406)
-        self.unknown_button = tk.Button(self, image=self.no_button_bg, command=self.next_card, bd=0, bg="#9ED2BE")
+
+        self.unknown_button = tk.Button(self, image=self.no_button_bg, command=lambda: self.next_card(
+            self.checked_language),
+                                        bd=0, bg="#9ED2BE")
         self.unknown_button.place(x=86, y=501)
 
-        self.known_button = tk.Button(self, image=self.yes_button_bg, command=self.next_card, bd=0, bg="#9ED2BE")
+        self.known_button = tk.Button(self, image=self.yes_button_bg, command=self.is_known, bd=0, bg="#9ED2BE")
         self.known_button.place(x=465, y=501)
 
 
-    def next_card(self):
+        #language = self.check_language()
+        # self.monitor_thread = threading.Thread(target=self.check_language)
+        # self.monitor_thread.daemon = True
+        # self.monitor_thread.start()
+
+        #print("current value: ", self.language)
+
+        #session_dict = self.read_csv_to_dict(self.checked_language)
+        #print(session_dict)
+
+    def check_language(self):
+        file_path = "./data/temporary_data/session.json"
+        try:
+            with open(file_path, 'r') as json_file:
+                data = json.load(json_file)
+                if not data:
+                    return 0
+                #session_type = data.get('type')
+                file_path = data.get('path')
+                print(file_path)
+                return file_path
+        except FileNotFoundError:
+            return None
+
+    # def check_language(self):
+    #     file_path = "./data/temporary_data/session.json"
+    #     while True:
+    #         try:
+    #             with open(file_path, 'r') as json_file:
+    #                 data = json.load(json_file)
+    #                 if not data:
+    #                     return 0
+    #                 #session_type = data.get('type')
+    #                 file_path = data.get('path')
+    #                 self.language = file_path
+    #         except FileNotFoundError:
+    #             return None
+
+
+    def read_csv_to_dict(self, file_path):
+        data_dict = {}
+        with open(file_path, 'r') as csvfile:
+            csvreader = csv.reader(csvfile)
+            for row in csvreader:
+                if len(row) >= 2:
+                    key = row[0]
+                    value = row[1]
+                    data_dict[key] = value
+        return data_dict
+
+
+    def next_card(self, language):
+        title = language.capitalize()
+        current_card = random.choice(self.dict)
+        self.canvas.itemconfig(self.card_language, text=f"{title}", fill="#FFD9B7")
+        self.canvas.itemconfig(self.card_word, text=current_card[f"{title}"], fill="White")
+        self.canvas.itemconfig(self.canvas_bg, image=self.flashcard_front_bg)
+
+    def flip_card(self):
+        self.canvas.itemconfig(self.canvas_bg, image=self.flashcard_back_bg)
+        self.canvas.itemconfig(self.card_word, text="English", fill="white")
+        self.canvas.itemconfig(self.card_word, text=self.current_card["English"], fill="white")
+
+    def is_known(self):
+        self.to_learn.remove(self.current_card)
+        data = pd.DataFrame(self.to_learn)
+        data.to_csv("./data/words_to_learn.csv", index=False)
+        self.next_card(self.checked_language)
+
+
+
+    def learning_session(self):
         pass
-
-
-
-
-
 
 if __name__ == "__main__":
     app = MainPanel()
