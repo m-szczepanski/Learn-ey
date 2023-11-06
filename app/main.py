@@ -19,6 +19,7 @@ import random
 import csv
 from functions.pass_session_data import pass_session_data
 from functions.clear_session_data import clear_json_file
+from app.functions.open_word_flashcard import open_word_flashcard
 
 BACKGROUND = "#cde3b6"
 repetitions = 0
@@ -110,7 +111,7 @@ class LeftFrame(tk.Frame):
 
         self.german_button = tk.Button(self, text="German", font=('Inter', 18, "bold"), background="#7eaa92",
                                        fg="#FFD9B7", bd=0, width=11,
-                                       command=lambda: pass_session_data("language", "german"))
+                                       command=lambda: open_word_flashcard("german"))
         self.german_button.place(x=61, y=487)
 
         self.polish_button = tk.Button(self, text="Polish", font=('Inter', 18, "bold"), background="#7eaa92",
@@ -537,13 +538,14 @@ class FullWordList(tk.Frame):
                 button = tk.Button(self, background="#7EAA92", fg="#FFD9B7", bd=0, width=button_width,
                                    height=button_height, text=language_name, font=('Inter', 12, "bold"),
                                    command=lambda lang=language_name: pass_session_data("languages", lang))
+
                 button.place(x=x_pos[column], y=y_pos[row])
                 language_index += 1
 
                 if language_index >= len(languages):
                     break
 
-        self.master.show_frame("flashcard_frame")
+        #self.master.show_frame("flashcard_frame")
         #Flashcard.check_language()
 
 
