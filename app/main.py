@@ -47,16 +47,12 @@ class MainPanel(tk.Tk):
         self.frames["word_frame"] = WordFrame(self)
         self.frames["expression_frame"] = ExpressionSection(self)
         self.frames["full_word_list"] = FullWordList(self)
-        self.frames["flashcard_frame"] = Flashcard(self)
 
         self.open_initial_frames()
         self.frames["right_frame"].set_main_panel_button_visibility(False)
 
     def show_frame(self, frame_name):
         if frame := self.frames.get(frame_name):
-            if frame_name == 'flashcard_frame':
-                self.frames['flashcard_frame'].check_language()
-
             if frame_name == 'left_frame':
                 self.frames["right_frame"].set_main_panel_button_visibility(False)
                 self.frames["left_frame"].update_top_panel()
@@ -116,8 +112,7 @@ class LeftFrame(tk.Frame):
 
         self.polish_button = tk.Button(self, text="Polish", font=('Inter', 18, "bold"), background="#7eaa92",
                                        fg="#FFD9B7", bd=0, width=11,
-                                       command=lambda: pass_session_data("language",
-                                                                         "polish")
+                                       command=lambda: open_word_flashcard("polish")
                                        )
         self.polish_button.place(x=270, y=487)
 
@@ -146,9 +141,6 @@ class LeftFrame(tk.Frame):
         saved_sessions = list_files_in_directory("./data/session_data", 5)
         self.populate_session_panel(saved_sessions)
 
-    def open_full_list(self):
-        pass
-
     def populate_session_panel(self, saved_sessions):
         panels_position_x = [255, 463, 47, 255, 463]
         panels_position_y = [42, 42, 211, 211, 211]
@@ -159,7 +151,7 @@ class LeftFrame(tk.Frame):
 
         sessions_number = len(saved_sessions)
 
-        for i, session in saved_sessions:
+        for i, session in enumerate(saved_sessions):
             session_label = tk.Label(self, image=self.session_bg, background="#9ed2be", bd=0)
             session_label.place(x=panels_position_x[i], y=panels_position_y[i])
             session_name = tk.Label(self, background="#7EAA92", font=('Inter', 30, "bold"), fg="#FFD9B7", bd=0,
@@ -399,7 +391,6 @@ class WordFrame(tk.Frame):
 
     def get_data_from_file(self):
         file_path = get_file_path()
-        print(file_path)
         if file_path.endswith(".json"):
             self.words, self.translations = fetch_json_data(file_path)
         elif file_path.endswith(".csv"):
@@ -529,7 +520,7 @@ class FullWordList(tk.Frame):
         button_height = 1
         x_pos = [90, 285, 485]
         y_pos = [236, 296, 359, 418, 480, 541, 601]
-        languages = list_files_in_directory("./data/words", 30)
+        languages = list_files_in_directory("data/words", 30)
 
         language_index = 0
         for row in range(7):
@@ -545,121 +536,6 @@ class FullWordList(tk.Frame):
                 if language_index >= len(languages):
                     break
 
-        #self.master.show_frame("flashcard_frame")
-        #Flashcard.check_language()
-
-
-class Flashcard(tk.Frame):
-    def __init__(self, master=None):
-        super().__init__(master)
-        self.master = master
-        self.configure(width=696, height=698)
-        self.background_image = PhotoImage(file=
-                                           "./components/graphical_components/flashcard/flashcard_panel.png")
-        self.background = tk.Label(self, image=self.background_image)
-        self.background.place(relwidth=1, relheight=1)
-
-        self.language = ''
-
-        self.flashcard_front_bg = PhotoImage(file="components/graphical_components/flashcard/flashcard_front.png")
-        self.flashcard_back_bg = PhotoImage(file="components/graphical_components/flashcard/flashcard_back.png")
-        self.flip_button_bg = PhotoImage(file="components/graphical_components/flashcard/flip_button.png")
-        self.canvas_background = PhotoImage(file="components/graphical_components/flashcard/canvas_bg.png")
-        self.yes_button_bg = PhotoImage(file="components/graphical_components/flashcard/yes_button.png")
-        self.no_button_bg = PhotoImage(file="components/graphical_components/flashcard/no_button.png")
-
-        self.canvas = tk.Canvas(self, width=616, height=311, bg="#7EAA92", highlightthickness=0)
-        self.canvas_bg = self.canvas.create_image(300, 200, anchor=tk.NW, image=self.flashcard_front_bg)
-        self.card_language = self.canvas.create_text(300, 50, text="Language", font=("Inter", 30, "normal"),
-                                                     fill="#FFD9B7")
-        self.card_word = self.canvas.create_text(300, 163, text="word", font=("Inter", 80, "bold"), fill="#FFFFFF")
-        self.canvas.place(x=47, y=62)
-
-        self.flip_button = tk.Button(self, image=self.flip_button_bg, command=self.flip_card, bd=0, bg="#9ED2BE")
-        self.flip_button.place(x=254, y=406)
-
-        self.unknown_button = tk.Button(self, image=self.no_button_bg, command=lambda: self.next_card(
-            self.checked_language),
-                                        bd=0, bg="#9ED2BE")
-        self.unknown_button.place(x=86, y=501)
-
-        self.known_button = tk.Button(self, image=self.yes_button_bg, command=self.is_known, bd=0, bg="#9ED2BE")
-        self.known_button.place(x=465, y=501)
-
-
-        #language = self.check_language()
-        # self.monitor_thread = threading.Thread(target=self.check_language)
-        # self.monitor_thread.daemon = True
-        # self.monitor_thread.start()
-
-        #print("current value: ", self.language)
-
-        #session_dict = self.read_csv_to_dict(self.checked_language)
-        #print(session_dict)
-
-    def check_language(self):
-        file_path = "./data/temporary_data/session.json"
-        try:
-            with open(file_path, 'r') as json_file:
-                data = json.load(json_file)
-                if not data:
-                    return 0
-                #session_type = data.get('type')
-                file_path = data.get('path')
-                print(file_path)
-                return file_path
-        except FileNotFoundError:
-            return None
-
-    # def check_language(self):
-    #     file_path = "./data/temporary_data/session.json"
-    #     while True:
-    #         try:
-    #             with open(file_path, 'r') as json_file:
-    #                 data = json.load(json_file)
-    #                 if not data:
-    #                     return 0
-    #                 #session_type = data.get('type')
-    #                 file_path = data.get('path')
-    #                 self.language = file_path
-    #         except FileNotFoundError:
-    #             return None
-
-
-    def read_csv_to_dict(self, file_path):
-        data_dict = {}
-        with open(file_path, 'r') as csvfile:
-            csvreader = csv.reader(csvfile)
-            for row in csvreader:
-                if len(row) >= 2:
-                    key = row[0]
-                    value = row[1]
-                    data_dict[key] = value
-        return data_dict
-
-
-    def next_card(self, language):
-        title = language.capitalize()
-        current_card = random.choice(self.dict)
-        self.canvas.itemconfig(self.card_language, text=f"{title}", fill="#FFD9B7")
-        self.canvas.itemconfig(self.card_word, text=current_card[f"{title}"], fill="White")
-        self.canvas.itemconfig(self.canvas_bg, image=self.flashcard_front_bg)
-
-    def flip_card(self):
-        self.canvas.itemconfig(self.canvas_bg, image=self.flashcard_back_bg)
-        self.canvas.itemconfig(self.card_word, text="English", fill="white")
-        self.canvas.itemconfig(self.card_word, text=self.current_card["English"], fill="white")
-
-    def is_known(self):
-        self.to_learn.remove(self.current_card)
-        data = pd.DataFrame(self.to_learn)
-        data.to_csv("./data/words_to_learn.csv", index=False)
-        self.next_card(self.checked_language)
-
-
-
-    def learning_session(self):
-        pass
 
 if __name__ == "__main__":
     app = MainPanel()
