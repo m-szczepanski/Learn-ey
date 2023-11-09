@@ -3,8 +3,6 @@ from tkinter import PhotoImage
 import math
 import json
 from app.components.pomodoro_settings import PomodoroSettings
-import threading
-import time
 from functions.safe_session import save_data
 from functions.get_file_path import get_file_path
 from functions.get_data_from_json_file import fetch_json_data
@@ -14,11 +12,6 @@ import os
 from functions.check_session_number import list_files_in_directory
 from functions.get_session_date import get_file_creation_time
 from functions.delete_session import delete_session
-import pandas as pd
-import random
-import csv
-from functions.pass_session_data import pass_session_data
-from functions.clear_session_data import clear_json_file
 from app.functions.open_word_flashcard import open_word_flashcard
 
 BACKGROUND = "#cde3b6"
@@ -37,8 +30,6 @@ class MainPanel(tk.Tk):
         self.background = tk.Label(self, image=self.background_image)
         self.background.place(relwidth=1, relheight=1)
         self.current_left_frame = None
-
-        clear_json_file("./data/temporary_data/session.json")
 
         self.frames = {}
 
@@ -63,8 +54,6 @@ class MainPanel(tk.Tk):
                 self.frames['right_frame'].set_main_panel_button_visibility(True)
 
             frame.tkraise()
-
-            # self.frames['right_frame'].monitor_button_state()
 
             if self.current_left_frame:
                 self.current_left_frame.forget()
@@ -118,22 +107,19 @@ class LeftFrame(tk.Frame):
 
         self.spanish_button = tk.Button(self, text="Spanish", font=('Inter', 18, "bold"), background="#7eaa92",
                                         fg="#FFD9B7", bd=0, width=11,
-                                        command=lambda: pass_session_data("language",
-                                                                          "spanish")
+                                        command=lambda: open_word_flashcard("spanish")
                                         )
         self.spanish_button.place(x=478, y=487)
 
         self.norwegian_button = tk.Button(self, text="Norwegian", font=('Inter', 18, "bold"), background="#7eaa92",
                                           fg="#FFD9B7", bd=0, width=11,
-                                          command=lambda: pass_session_data("language",
-                                                                            "norwegian")
+                                          command=lambda: open_word_flashcard("norwegian")
                                           )
         self.norwegian_button.place(x=60, y=577)
 
         self.esperanto_button = tk.Button(self, text="Esperanto", font=('Inter', 18, "bold"), background="#7eaa92",
                                           fg="#FFD9B7", bd=0, width=11,
-                                          command=lambda: pass_session_data("language",
-                                                                            "esperanto")
+                                          command=lambda: open_word_flashcard("esperanto")
                                           )
         self.esperanto_button.place(x=268, y=577)
 
@@ -249,8 +235,6 @@ class RightFrame(tk.Frame):
                                      highlightthickness=0, highlightbackground='#cde3b6')
         self.quit_button.place(x=38, y=602)
 
-        # self.monitor_button_state()
-
     def count_down(self, count):
         global num_of_ticks
         count_min = math.floor(count / 60)
@@ -313,28 +297,14 @@ class RightFrame(tk.Frame):
         if self.main_panel_button_enabled:
             self.master.show_frame("left_frame")
             self.set_main_panel_button_visibility(False)
-            clear_json_file("./data/temporary_data/session.json")
 
     def set_main_panel_button_visibility(self, value):
         self.main_panel_button_enabled = value
-
-    # def monitor_button_state(self):
-    #     def check_state():
-    #         while True:
-    #             self.main_panel_button.config(state="normal") if self.main_panel_button_enabled else (
-    #                 self.main_panel_button.config(state="disabled"))
-    #             time.sleep(0.5)
-    #
-    #     thread = threading.Thread(target=check_state)
-    #     thread.daemon = True
-    #     thread.start()
-
 
     def open_about(self):
         print('About button has been pressed')
 
     def quit_app(self):
-        clear_json_file("./data/temporary_data/session.json")
         self.master.destroy()
 
 

@@ -30,7 +30,7 @@ class WordFlashcard(tk.Toplevel):
         self.canvas_bg = self.canvas.create_image(0, 0, anchor=tk.NW, image=self.flashcard_front_bg)
         self.card_language = self.canvas.create_text(300, 50, text="Language", font=("Inter", 30, "normal"),
                                                      fill="#FFD9B7")
-        self.card_word = self.canvas.create_text(300, 163, text="word", font=("Inter", 80, "bold"), fill="#FFFFFF")
+        self.card_word = self.canvas.create_text(300, 163, text="word", font=("Inter", 70, "bold"), fill="#FFFFFF")
         self.canvas.place(x=32, y=62)
 
         self.flip_button = tk.Button(self, image=self.flip_button_bg, command=self.flip_card, bd=0, bg="#9ED2BE")
@@ -67,13 +67,15 @@ class WordFlashcard(tk.Toplevel):
             self.canvas.itemconfig(self.card_word, text="", fill="white")
 
         self.canvas.itemconfig(self.canvas_bg, image=self.flashcard_front_bg)
+        print(len(self.dict)) # debug
+        # if len == 0 -> report
 
     def flip_card(self):
         if self.current_card:
             if self.canvas.itemcget(self.canvas_bg, "image") == str(self.flashcard_front_bg):
                 # If the card is faced upwards, flip to the backside
                 self.canvas.itemconfig(self.canvas_bg, image=self.flashcard_back_bg)
-                self.canvas.itemconfig(self.card_word, text=self.current_card[1], fill="white")
+                self.canvas.itemconfig(self.card_word, text=self.current_card[1], fill="#7eaa92")
                 self.canvas.itemconfig(self.card_language, text="English", fill="black")
             else:
                 # If the card is faced downwards, flip to the front-side
