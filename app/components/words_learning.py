@@ -61,28 +61,22 @@ class WordFlashcard(tk.Toplevel):
             self.canvas.itemconfig(self.card_language, text=self.lang_name, fill="#FFD9B7")
             self.canvas.itemconfig(self.card_word, text=self.current_card[0], fill="white")
         else:
-            # Jeśli słownik jest pusty, to nie ma kart do wyświetlenia.
+            # If dictionary is empty, there's no cards to display.
             self.current_card = None
             self.canvas.itemconfig(self.card_language, text="No cards remaining", fill="#FFD9B7")
             self.canvas.itemconfig(self.card_word, text="", fill="white")
 
         self.canvas.itemconfig(self.canvas_bg, image=self.flashcard_front_bg)
 
-    # def flip_card(self):
-    #     if self.current_card:
-    #         self.canvas.itemconfig(self.canvas_bg, image=self.flashcard_back_bg)
-    #         #self.canvas.itemconfig(self.canvas,)
-    #         self.canvas.itemconfig(self.card_word, text=self.current_card[1], fill="white")
-    #         self.canvas.itemconfig(self.card_word, text=self.dict[self.current_card[0]], fill="white")
     def flip_card(self):
         if self.current_card:
             if self.canvas.itemcget(self.canvas_bg, "image") == str(self.flashcard_front_bg):
-                # Jeśli karta jest z przodu, to obróć na tył
+                # If the card is faced upwards, flip to the backside
                 self.canvas.itemconfig(self.canvas_bg, image=self.flashcard_back_bg)
                 self.canvas.itemconfig(self.card_word, text=self.current_card[1], fill="white")
                 self.canvas.itemconfig(self.card_language, text="English", fill="black")
             else:
-                # Jeśli karta jest z tyłu, to obróć na przód
+                # If the card is faced downwards, flip to the front-side
                 self.canvas.itemconfig(self.canvas_bg, image=self.flashcard_front_bg)
                 self.canvas.itemconfig(self.card_word, text=self.current_card[0], fill="white")
                 self.canvas.itemconfig(self.card_language, text=self.lang_name, fill="#FFD9B7")
