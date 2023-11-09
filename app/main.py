@@ -102,7 +102,7 @@ class LeftFrame(tk.Frame):
 
         self.polish_button = tk.Button(self, text="Polish", font=('Inter', 18, "bold"), background="#7eaa92",
                                        fg="#FFD9B7", bd=0, width=11,
-                                       command=lambda: open_word_flashcard("polish")
+                                       command=lambda: open_word_flashcard("test")
                                        )
         self.polish_button.place(x=270, y=487)
 
