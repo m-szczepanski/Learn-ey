@@ -79,6 +79,7 @@ class LeftFrame(tk.Frame):
         self.pack(side="left")
 
         # top panel
+        self.top_panel_bg = PhotoImage(file="./components/graphical_components/main_panel/top_panel.png")
         self.new_session_button_bg = (
             PhotoImage(file="./components/graphical_components/main_panel/add_session_button.png"))
         self.session_bg = PhotoImage(file="./components/graphical_components/main_panel/session_bg.png")
@@ -135,6 +136,13 @@ class LeftFrame(tk.Frame):
         panels_name_position_y = [95, 95, 262, 262, 262]
         panels_delete_button_position_y = [49, 49, 218, 218, 218]
 
+        self.top_panel = tk.Label(self, image=self.top_panel_bg, background="#C8E4B2", bd=0)
+        self.top_panel.place(x=32, y=26)
+
+        self.new_session_button = tk.Button(self, command=lambda: self.master.show_frame("word_frame"),
+                                            image=self.new_session_button_bg, bd=0, background='#9ed2be')
+        self.new_session_button.place(x=50, y=42)
+
         sessions_number = len(saved_sessions)
 
         for i, session in enumerate(saved_sessions):
@@ -150,11 +158,6 @@ class LeftFrame(tk.Frame):
             session_delete_button = tk.Button(self, image=self.session_delete_bg, background="#7eaa92", bd=0,
                                               command=lambda session=session: self.delete_session(session))
             session_delete_button.place(x=panels_position_x[i] + 158, y=panels_delete_button_position_y[i])
-
-            while sessions_number < 5:
-                session_label = tk.Label(self, image=self.blank_session_bg, background="#9ed2be", bd=0)
-                session_label.place(x=panels_position_x[sessions_number], y=panels_position_y[sessions_number])
-                sessions_number += 1
 
     def delete_session(self, session_name):
         if confirmation := messagebox.askyesno(
