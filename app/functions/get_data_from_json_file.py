@@ -1,7 +1,7 @@
 import json
 
 
-def fetch_data(file_path):
+def fetch_json_data(file_path):
     keys = []
     values = []
 

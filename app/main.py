@@ -3,16 +3,16 @@ from tkinter import PhotoImage
 import math
 import json
 from app.components.pomodoro_settings import PomodoroSettings
-import threading
-import time
 from functions.safe_session import save_data
 from functions.get_file_path import get_file_path
-from functions.get_data_from_file import fetch_data
+from functions.get_data_from_json_file import fetch_json_data
+from functions.get_data_from_csv_file import fetch_csv_data
 from tkinter import messagebox
 import os
 from functions.check_session_number import list_files_in_directory
 from functions.get_session_date import get_file_creation_time
 from functions.delete_session import delete_session
+from app.functions.open_word_flashcard import open_word_flashcard
 
 BACKGROUND = "#cde3b6"
 repetitions = 0
@@ -37,6 +37,7 @@ class MainPanel(tk.Tk):
         self.frames["right_frame"] = RightFrame(self)
         self.frames["word_frame"] = WordFrame(self)
         self.frames["expression_frame"] = ExpressionSection(self)
+        self.frames["full_word_list"] = FullWordList(self)
 
         self.open_initial_frames()
         self.frames["right_frame"].set_main_panel_button_visibility(False)
@@ -53,8 +54,6 @@ class MainPanel(tk.Tk):
                 self.frames['right_frame'].set_main_panel_button_visibility(True)
 
             frame.tkraise()
-
-            self.frames['right_frame'].monitor_button_state()
 
             if self.current_left_frame:
                 self.current_left_frame.forget()
@@ -89,8 +88,43 @@ class LeftFrame(tk.Frame):
                                             image=self.new_session_button_bg, bd=0, background='#9ed2be')
         self.new_session_button.place(x=50, y=42)
 
+        # bottom panel
+        self.full_list_bg = PhotoImage(file="components/graphical_components/main_panel/full_list_button.png")
+        self.full_list = tk.Button(self, image=self.full_list_bg, command=lambda: master.show_frame("full_word_list"),
+                                   bd=0, bg="#9ed2be", width=188, height=62)
+        self.full_list.place(x=468, y=569)
+
+        self.german_button = tk.Button(self, text="German", font=('Inter', 18, "bold"), background="#7eaa92",
+                                       fg="#FFD9B7", bd=0, width=11,
+                                       command=lambda: open_word_flashcard("german"))
+        self.german_button.place(x=61, y=487)
+
+        self.polish_button = tk.Button(self, text="Polish", font=('Inter', 18, "bold"), background="#7eaa92",
+                                       fg="#FFD9B7", bd=0, width=11,
+                                       command=lambda: open_word_flashcard("polish")
+                                       )
+        self.polish_button.place(x=270, y=487)
+
+        self.spanish_button = tk.Button(self, text="Spanish", font=('Inter', 18, "bold"), background="#7eaa92",
+                                        fg="#FFD9B7", bd=0, width=11,
+                                        command=lambda: open_word_flashcard("spanish")
+                                        )
+        self.spanish_button.place(x=478, y=487)
+
+        self.norwegian_button = tk.Button(self, text="Norwegian", font=('Inter', 18, "bold"), background="#7eaa92",
+                                          fg="#FFD9B7", bd=0, width=11,
+                                          command=lambda: open_word_flashcard("norwegian")
+                                          )
+        self.norwegian_button.place(x=60, y=577)
+
+        self.esperanto_button = tk.Button(self, text="Esperanto", font=('Inter', 18, "bold"), background="#7eaa92",
+                                          fg="#FFD9B7", bd=0, width=11,
+                                          command=lambda: open_word_flashcard("esperanto")
+                                          )
+        self.esperanto_button.place(x=268, y=577)
+
     def update_top_panel(self):
-        saved_sessions = list_files_in_directory()
+        saved_sessions = list_files_in_directory("./data/session_data", 5)
         self.populate_session_panel(saved_sessions)
 
     def populate_session_panel(self, saved_sessions):
@@ -152,7 +186,7 @@ class RightFrame(tk.Frame):
 
         self.timer = tk.Label(self, text="--:--", font=('Courier', 28, "normal"), fg="#FFD9B7", background="#dd2e44",
                               bd=0)
-        self.timer.place(x=80, y=130)
+        self.timer.place(x=80, y=138)
 
         self.tick = tk.Label(self, text='', fg="#7EAA92", bg="#dd2e44", font=('Courier', 10, "bold"))
         self.tick.place(x=95, y=200)
@@ -164,14 +198,14 @@ class RightFrame(tk.Frame):
 
         self.start_button = tk.Button(self, command=lambda: self.start_timer(),
                                       image=self.start_button_bg, bd=0, background=BACKGROUND)
-        self.start_button.place(x=41, y=267)
+        self.start_button.place(x=41, y=278)
         self.stop_button = tk.Button(self, command=self.reset_timer, image=self.stop_button_bg, bd=0,
                                      background=BACKGROUND)
-        self.stop_button.place(x=110, y=267)
+        self.stop_button.place(x=110, y=278)
 
         self.options_button = tk.Button(self, command=self.open_settings, image=self.options_button_bg, bd=0,
                                         background=BACKGROUND)
-        self.options_button.place(x=178, y=267)
+        self.options_button.place(x=178, y=278)
 
         self.timer_state_idle_bg = PhotoImage(file="./components/graphical_components/pomodoro/start_the_timer.png")
         self.timer_state_learning_time_bg = PhotoImage(
@@ -200,8 +234,6 @@ class RightFrame(tk.Frame):
         self.quit_button = tk.Button(self, command=self.quit_app, image=self.quit_button_bg, bd=0, background='#cde3b6',
                                      highlightthickness=0, highlightbackground='#cde3b6')
         self.quit_button.place(x=38, y=602)
-
-        self.monitor_button_state()
 
     def count_down(self, count):
         global num_of_ticks
@@ -269,18 +301,6 @@ class RightFrame(tk.Frame):
     def set_main_panel_button_visibility(self, value):
         self.main_panel_button_enabled = value
 
-    def monitor_button_state(self):
-        def check_state():
-            while True:
-                self.main_panel_button.config(state="normal") if self.main_panel_button_enabled else (
-                    self.main_panel_button.config(state="disabled"))
-                time.sleep(0.5)
-
-        thread = threading.Thread(target=check_state)
-        thread.daemon = True
-        thread.start()
-
-
     def open_about(self):
         print('About button has been pressed')
 
@@ -341,7 +361,12 @@ class WordFrame(tk.Frame):
 
     def get_data_from_file(self):
         file_path = get_file_path()
-        self.words, self.translations = fetch_data(file_path)
+        if file_path.endswith(".json"):
+            self.words, self.translations = fetch_json_data(file_path)
+        elif file_path.endswith(".csv"):
+            self.words, self.translations = fetch_csv_data(file_path)
+        else:
+            print("File path is not supported. Chose either csv or json.")
 
     def safe_session(self):
         session_name = self.safe_as_label.get()
@@ -349,11 +374,10 @@ class WordFrame(tk.Frame):
         file_path = os.path.join(data_directory, f"{session_name}.json")
         if os.path.exists(file_path):
             messagebox.showinfo("Session name error", "Session with this name exists. Chose another name.")
-            self.safe_as_label.delete(0, 'end')
         else:
             save_data(self.words, self.translations, session_name)
-            self.safe_as_label.delete(0, 'end')
 
+        self.safe_as_label.delete(0, 'end')
 
     def append_arrays(self):
         x = self.word_entry.get()
@@ -369,6 +393,7 @@ class WordFrame(tk.Frame):
 class ExpressionSection(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
+        self.words = None
         self.master = master
         self.configure(width=696, height=698)
         self.background_image = PhotoImage(file=
@@ -387,11 +412,12 @@ class ExpressionSection(tk.Frame):
         self.confirm_button_bg = PhotoImage(file="./components/graphical_components/material_panel/confirm_button.png")
 
         self.expression_entry = tk.Entry(self, width=32, background="#7eaa92", fg="white", bd=0, justify="center",
-                                   font=("Arial", 16))
+                                         font=("Arial", 16))
+
         self.expression_entry.place(x=210, y=164)
 
         self.definition_entry = tk.Entry(self, width=32, background="#7eaa92", fg="white", bd=0, justify="center",
-                                          font=("Arial", 16))
+                                         font=("Arial", 16))
         self.definition_entry.place(x=210, y=264)
 
         self.next_one = tk.Button(self, command=self.append_arrays, image=self.next_one_button_bg, bd=0,
@@ -420,7 +446,13 @@ class ExpressionSection(tk.Frame):
 
     def get_data_from_file(self):
         file_path = get_file_path()
-        self.expressions, self.definitions = fetch_data(file_path)
+        print(file_path)
+        if file_path.endswith(".json"):
+            self.words, self.translations = fetch_json_data(file_path)
+        elif file_path.endswith(".csv"):
+            self.words, self.translations = fetch_csv_data(file_path)
+        else:
+            print("File path is not supported. Chose either csv or json.")
 
     def safe_session(self):
         session_name = self.safe_as_label.get()
@@ -428,10 +460,10 @@ class ExpressionSection(tk.Frame):
         file_path = os.path.join(data_directory, f"{session_name}.json")
         if os.path.exists(file_path):
             messagebox.showinfo("Session name error", "Session with this name exists. Chose another name.")
-            self.safe_as_label.delete(0, 'end')
         else:
             save_data(self.expressions, self.definitions, session_name)
-            self.safe_as_label.delete(0, 'end')
+
+        self.safe_as_label.delete(0, 'end')
 
     def append_arrays(self):
         x = self.expression_entry.get()
@@ -442,6 +474,39 @@ class ExpressionSection(tk.Frame):
             print(self.expressions, self.definitions)
             self.expression_entry.delete(0, 'end')
             self.definition_entry.delete(0, 'end')
+
+
+class FullWordList(tk.Frame):
+    def __init__(self, master=None):
+        super().__init__(master)
+        self.master = master
+        self.configure(width=696, height=698)
+        self.background_image = PhotoImage(file=
+                                           "./components/graphical_components/material_panel/language_full_list.png")
+        self.background = tk.Label(self, image=self.background_image)
+        self.background.place(relwidth=1, relheight=1)
+        self.create_buttons()
+
+    def create_buttons(self):
+        button_width = 11
+        button_height = 1
+        x_pos = [90, 285, 485]
+        y_pos = [236, 296, 359, 418, 480, 541, 601]
+        languages = list_files_in_directory("data/words", 30)
+
+        language_index = 0
+        for row in range(7):
+            for column in range(3):
+                language_name = languages[language_index][:-4].capitalize()
+                button = tk.Button(self, background="#7EAA92", fg="#FFD9B7", bd=0, width=button_width,
+                                   height=button_height, text=language_name, font=('Inter', 12, "bold"),
+                                   command=lambda lang=language_name: open_word_flashcard(lang))
+
+                button.place(x=x_pos[column], y=y_pos[row])
+                language_index += 1
+
+                if language_index >= len(languages):
+                    break
 
 
 if __name__ == "__main__":
