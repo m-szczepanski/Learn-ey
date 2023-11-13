@@ -15,6 +15,7 @@ class WordFlashcard(tk.Toplevel):
         self.resizable(False, False)
         self.wm_attributes("-topmost", True)
 
+
         self.background_image = PhotoImage(file=
                                            "./components/graphical_components/flashcard/flashcard_panel.png")
         self.background = tk.Label(self, image=self.background_image)
@@ -49,6 +50,8 @@ class WordFlashcard(tk.Toplevel):
 
         self.dict = read_csv_to_dict(f"./data/words/{self.picked_lang}.csv", self.lang_name)
         self.dict_len = len(self.dict)
+
+        self.protocol("WM_DELETE_WINDOW", lambda: self.force_close(self.unknown, self.dict_len))
         self.next_card()
 
     def next_card(self):
@@ -61,11 +64,11 @@ class WordFlashcard(tk.Toplevel):
             self.current_card = None
             self.canvas.itemconfig(self.card_language, text="No cards remaining", fill="#FFD9B7")
             self.canvas.itemconfig(self.card_word, text="", fill="white")
+            self.close()
             open_session_report(self.unknown, self.dict_len)
 
         self.canvas.itemconfig(self.canvas_bg, image=self.flashcard_front_bg)
-        print(len(self.dict))  # debug
-        # if len == 0 -> report
+        print(len(self.dict))
 
     def flip_card(self):
         if self.current_card:
@@ -91,3 +94,9 @@ class WordFlashcard(tk.Toplevel):
             del self.dict[self.current_card[0]]  # Usuń z słownika self.dict
             self.next_card()
 
+    def close(self):
+        self.destroy()
+
+    def force_close(self, unknown, dict_len):
+        self.close()
+        open_session_report(unknown, dict_len)

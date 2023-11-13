@@ -30,6 +30,7 @@ class MainPanel(tk.Tk):
         self.background = tk.Label(self, image=self.background_image)
         self.background.place(relwidth=1, relheight=1)
         self.current_left_frame = None
+        self.protocol("WM_DELETE_WINDOW", lambda: self.destroy())
 
         self.frames = {}
 

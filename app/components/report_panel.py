@@ -71,3 +71,4 @@ class ReportPanel(tk.Toplevel):
 
     def exit(self):
         self.destroy()
+
