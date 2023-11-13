@@ -30,6 +30,7 @@ class MainPanel(tk.Tk):
         self.background = tk.Label(self, image=self.background_image)
         self.background.place(relwidth=1, relheight=1)
         self.current_left_frame = None
+        self.protocol("WM_DELETE_WINDOW", lambda: self.destroy())
 
         self.frames = {}
 
@@ -102,7 +103,7 @@ class LeftFrame(tk.Frame):
 
         self.polish_button = tk.Button(self, text="Polish", font=('Inter', 18, "bold"), background="#7eaa92",
                                        fg="#FFD9B7", bd=0, width=11,
-                                       command=lambda: open_word_flashcard("polish")
+                                       command=lambda: open_word_flashcard("test")
                                        )
         self.polish_button.place(x=270, y=487)
 
@@ -135,6 +136,7 @@ class LeftFrame(tk.Frame):
         panels_name_position_x = [292, 499, 82, 293, 501]
         panels_name_position_y = [95, 95, 262, 262, 262]
         panels_delete_button_position_y = [49, 49, 218, 218, 218]
+        panel_width = 186
 
         self.top_panel = tk.Label(self, image=self.top_panel_bg, background="#C8E4B2", bd=0)
         self.top_panel.place(x=32, y=26)
@@ -148,16 +150,21 @@ class LeftFrame(tk.Frame):
         for i, session in enumerate(saved_sessions):
             session_label = tk.Label(self, image=self.session_bg, background="#9ed2be", bd=0)
             session_label.place(x=panels_position_x[i], y=panels_position_y[i])
+
             session_name = tk.Label(self, background="#7EAA92", font=('Inter', 30, "bold"), fg="#FFD9B7", bd=0,
                                     text=session[:-5])
-            session_name.place(x=panels_name_position_x[i], y=panels_name_position_y[i])
+            session_name_width = session_name.winfo_reqwidth()
+            session_name_x = panels_position_x[i] + (panel_width - session_name_width) // 2
+            session_name.place(x=session_name_x, y=panels_name_position_y[i])
+
             session_date = get_file_creation_time(saved_sessions[i])
             session_date_panel = tk.Label(self, background="#7eaa92", bd=0, font=('Inter', 10, "normal"), fg="#ffffff",
                                           text=session_date)
             session_date_panel.place(x=panels_position_x[i] + 60, y=panels_date_position_y[i])
+
             session_delete_button = tk.Button(self, image=self.session_delete_bg, background="#7eaa92", bd=0,
                                               command=lambda session=session: self.delete_session(session))
-            session_delete_button.place(x=panels_position_x[i] + 158, y=panels_delete_button_position_y[i])
+            session_delete_button.place(x=panels_position_x[i] + panel_width - 28, y=panels_delete_button_position_y[i])
 
     def delete_session(self, session_name):
         if confirmation := messagebox.askyesno(
@@ -373,12 +380,19 @@ class WordFrame(tk.Frame):
 
     def safe_session(self):
         session_name = self.safe_as_label.get()
-        data_directory = "data/session_data"
-        file_path = os.path.join(data_directory, f"{session_name}.json")
-        if os.path.exists(file_path):
-            messagebox.showinfo("Session name error", "Session with this name exists. Chose another name.")
+        if len(session_name) > 8:
+            (messagebox.showinfo
+             ("Session name error", "Session name is too long. Maximum length is 8 characters."))
         else:
-            save_data(self.words, self.translations, session_name)
+            data_directory = "data/session_data"
+            file_path = os.path.join(data_directory, f"{session_name}.json")
+            if os.path.exists(file_path):
+                (messagebox.showinfo
+                 ("Session name error", "Session with this name exists. Choose another name."))
+            else:
+                save_data(self.words, self.translations, session_name)
+
+        self.safe_as_label.delete(0, 'end')
 
         self.safe_as_label.delete(0, 'end')
 
@@ -459,12 +473,15 @@ class ExpressionSection(tk.Frame):
 
     def safe_session(self):
         session_name = self.safe_as_label.get()
-        data_directory = "data/session_data"
-        file_path = os.path.join(data_directory, f"{session_name}.json")
-        if os.path.exists(file_path):
-            messagebox.showinfo("Session name error", "Session with this name exists. Chose another name.")
+        if len(session_name) > 8:
+            messagebox.showinfo("Session name error", "Session name is too long. Maximum length is 8 characters.")
         else:
-            save_data(self.expressions, self.definitions, session_name)
+            data_directory = "data/session_data"
+            file_path = os.path.join(data_directory, f"{session_name}.json")
+            if os.path.exists(file_path):
+                messagebox.showinfo("Session name error", "Session with this name exists. Choose another name.")
+            else:
+                save_data(self.expressions, self.definitions, session_name)
 
         self.safe_as_label.delete(0, 'end')
 

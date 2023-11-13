@@ -1,8 +1,8 @@
 import tkinter as tk
 from tkinter import PhotoImage
 import random
-import pandas as pd
 from app.functions.csv_to_dict import read_csv_to_dict
+from app.functions.open_session_report import open_session_report
 
 
 class WordFlashcard(tk.Toplevel):
@@ -10,9 +10,11 @@ class WordFlashcard(tk.Toplevel):
         super().__init__()
         self.picked_lang = language
         self.lang_name = self.picked_lang.capitalize()
+        self.title(f"Flashcard - {self.lang_name}")
         self.geometry("681x686")
         self.resizable(False, False)
         self.wm_attributes("-topmost", True)
+
 
         self.background_image = PhotoImage(file=
                                            "./components/graphical_components/flashcard/flashcard_panel.png")
@@ -36,28 +38,25 @@ class WordFlashcard(tk.Toplevel):
         self.flip_button = tk.Button(self, image=self.flip_button_bg, command=self.flip_card, bd=0, bg="#9ED2BE")
         self.flip_button.place(x=248, y=398)
 
-        self.unknown_button = tk.Button(self, image=self.no_button_bg, command=lambda: self.next_card(),
+        self.unknown_button = tk.Button(self, image=self.no_button_bg, command=lambda: self.is_unknown(),
                                         bd=0, bg="#9ED2BE")
         self.unknown_button.place(x=82, y=488)
 
         self.known_button = tk.Button(self, image=self.yes_button_bg, command=self.is_known, bd=0, bg="#9ED2BE")
         self.known_button.place(x=448, y=488)
 
-        self.print_lang()
-
         self.current_card = {}
+        self.unknown = {}
 
         self.dict = read_csv_to_dict(f"./data/words/{self.picked_lang}.csv", self.lang_name)
-        print(dict)
-        self.next_card()
+        self.dict_len = len(self.dict)
 
-    def print_lang(self):
-        print(self.picked_lang)
+        self.protocol("WM_DELETE_WINDOW", lambda: self.force_close(self.unknown, self.dict_len))
+        self.next_card()
 
     def next_card(self):
         if self.dict:
             self.current_card = random.choice(list(self.dict.items()))
-            print(self.current_card)
             self.canvas.itemconfig(self.card_language, text=self.lang_name, fill="#FFD9B7")
             self.canvas.itemconfig(self.card_word, text=self.current_card[0], fill="white")
         else:
@@ -65,10 +64,11 @@ class WordFlashcard(tk.Toplevel):
             self.current_card = None
             self.canvas.itemconfig(self.card_language, text="No cards remaining", fill="#FFD9B7")
             self.canvas.itemconfig(self.card_word, text="", fill="white")
+            self.close()
+            open_session_report(self.unknown, self.dict_len)
 
         self.canvas.itemconfig(self.canvas_bg, image=self.flashcard_front_bg)
-        print(len(self.dict)) # debug
-        # if len == 0 -> report
+        print(len(self.dict))
 
     def flip_card(self):
         if self.current_card:
@@ -87,3 +87,16 @@ class WordFlashcard(tk.Toplevel):
         if self.current_card:
             del self.dict[self.current_card[0]]
             self.next_card()
+
+    def is_unknown(self):
+        if self.current_card:
+            self.unknown[self.current_card[0]] = self.current_card[1]  # Dodaj do słownika self.unknown
+            del self.dict[self.current_card[0]]  # Usuń z słownika self.dict
+            self.next_card()
+
+    def close(self):
+        self.destroy()
+
+    def force_close(self, unknown, dict_len):
+        self.close()
+        open_session_report(unknown, dict_len)
