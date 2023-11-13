@@ -13,6 +13,7 @@ from functions.check_session_number import list_files_in_directory
 from functions.get_session_date import get_file_creation_time
 from functions.delete_session import delete_session
 from app.functions.open_word_flashcard import open_word_flashcard
+from app.functions.open_saved_session import open_learning_session
 
 BACKGROUND = "#cde3b6"
 repetitions = 0
@@ -148,7 +149,8 @@ class LeftFrame(tk.Frame):
         sessions_number = len(saved_sessions)
 
         for i, session in enumerate(saved_sessions):
-            session_label = tk.Label(self, image=self.session_bg, background="#9ed2be", bd=0)
+            session_label = tk.Button(self, image=self.session_bg, background="#9ed2be", bd=0,
+                                      command=lambda: open_learning_session(session[:-5]))
             session_label.place(x=panels_position_x[i], y=panels_position_y[i])
 
             session_name = tk.Label(self, background="#7EAA92", font=('Inter', 30, "bold"), fg="#FFD9B7", bd=0,
