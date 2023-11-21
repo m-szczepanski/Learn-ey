@@ -71,15 +71,32 @@ class LearningSession(tk.Toplevel):
         setattr(self, f"last_chosen_{chosen_entry[0]}", chosen_entry[0])
 
         return chosen_entry[1], chosen_entry[0]
+        # debug -------------------------
+    #     hangman_dict = self.hangman_dict
+    #
+    #     if len(hangman_dict) > 0:
+    #         return self.tf_dict, "tf"
+    #     else:
+    #         return None, None
+    #
+    # def get_random_key_value(self):
+    #     if not self.chosen_dict:
+    #         return None, None
+    #
+    #     random_key = random.choice(list(self.chosen_dict.keys()))
+    #     random_value = self.chosen_dict[random_key]
+    #     return random_key, random_value
 
     def get_random_key_value(self):
         if not self.chosen_dict:
             return None, None
-
         random_key = random.choice(list(self.chosen_dict.keys()))
         random_value = self.chosen_dict[random_key]
         return random_key, random_value
 
+
+# todo elementy UI klas tk.Frame
+# todo do parametrów dodać jescze jeden, który jest arrayem zawierającym niepoprawne odpowiedzi
 
 class Flashcard(tk.Frame):
     def __init__(self, parent, key, value):
@@ -136,8 +153,33 @@ class MatchExpression(tk.Frame):
 
         self.background_image = PhotoImage(file="./components/graphical_components/games/match_expression/"
                                            "match_expression_bg.png")
+        self.button_bg = PhotoImage(file="./components/graphical_components/games/match_expression/button_bg.png")
+        self.label_bg = PhotoImage(file="./components/graphical_components/games/pick_correct/label_bg.png")
+
         self.background = tk.Label(self, image=self.background_image)
         self.background.place(relwidth=1, relheight=1)
+
+        self.canvas = tk.Canvas(self, width=616, height=357, bg="#9ed2be", highlightthickness=0)
+        self.canvas_bg = self.canvas.create_image(0, 0, anchor=tk.NW, image=self.label_bg)
+        self.canvas.place(x=33, y=67)
+
+        self.word_to_display = tk.Label(
+            self.canvas,
+            text=key,
+            font=('Inter', 60, 'bold'),
+            background="#7eaa92",
+            fg="#FFD9B7",
+            wraplength=600
+        )
+
+        self.canvas.create_window(308, 178, window=self.word_to_display, anchor="center")
+
+        self.answer_a = tk.Button(self, image=self.button_bg, bd=0, bg="#9ed2be")
+        self.answer_a.place(x=119, y=443)
+        self.answer_b = tk.Button(self, image=self.button_bg, bd=0, bg="#9ed2be")
+        self.answer_b.place(x=119, y=513)
+        self.answer_c = tk.Button(self, image=self.button_bg, bd=0, bg="#9ed2be")
+        self.answer_c.place(x=119, y=588)
         self.pack()
 
 
@@ -152,8 +194,34 @@ class MatchTranslation(tk.Frame):
         self.background_image = PhotoImage(file=
                                            "./components/graphical_components/games/match_translation/"
                                            "match_translation_bg.png")
+        self.button_bg = PhotoImage(file="./components/graphical_components/games/match_translation/button_bg.png")
+        self.label_bg = PhotoImage(file="./components/graphical_components/games/pick_correct/label_bg.png")
         self.background = tk.Label(self, image=self.background_image)
         self.background.place(relwidth=1, relheight=1)
+
+        self.canvas = tk.Canvas(self, width=616, height=357, bg="#9ed2be", highlightthickness=0)
+        self.canvas_bg = self.canvas.create_image(0, 0, anchor=tk.NW, image=self.label_bg)
+        self.canvas.place(x=33, y=67)
+
+        self.word_to_display = tk.Label(
+            self.canvas,
+            text=key,
+            font=('Inter', 60, 'bold'),
+            background="#7eaa92",
+            fg="#FFD9B7",
+            wraplength=600
+        )
+
+        self.canvas.create_window(308, 178, window=self.word_to_display, anchor="center")
+
+        self.answer_a = tk.Button(self, image=self.button_bg, bd=0, bg="#9ed2be")
+        self.answer_a.place(x=41, y=455)
+        self.answer_b = tk.Button(self, image=self.button_bg, bd=0, bg="#9ed2be")
+        self.answer_b.place(x=365, y=455)
+        self.answer_c = tk.Button(self, image=self.button_bg, bd=0, bg="#9ed2be")
+        self.answer_c.place(x=41, y=563)
+        self.answer_d = tk.Button(self, image=self.button_bg, bd=0, bg="#9ed2be")
+        self.answer_d.place(x=365, y=563)
         self.pack()
 
 
@@ -166,8 +234,32 @@ class TrueFalse(tk.Frame):
 
         self.background_image = PhotoImage(file=
                                            "./components/graphical_components/games/true_false/true_false_bg.png")
+        self.no_button_bg = PhotoImage(file="./components/graphical_components/flashcard/no_button.png")
+        self.yes_button_bg = PhotoImage(file="./components/graphical_components/flashcard/yes_button.png")
+        self.label_bg = PhotoImage(file="./components/graphical_components/games/pick_correct/label_bg.png")
         self.background = tk.Label(self, image=self.background_image)
         self.background.place(relwidth=1, relheight=1)
+
+        self.canvas = tk.Canvas(self, width=616, height=357, bg="#9ed2be", highlightthickness=0)
+        self.canvas_bg = self.canvas.create_image(0, 0, anchor=tk.NW, image=self.label_bg)
+        self.canvas.place(x=33, y=67)
+
+        self.word_to_display = tk.Label(
+            self.canvas,
+            text=key,
+            font=('Inter', 60, 'bold'),
+            background="#7eaa92",
+            fg="#FFD9B7",
+            wraplength=600
+        )
+
+        self.canvas.create_window(308, 178, window=self.word_to_display, anchor="center")
+
+        self.false_button = tk.Button(self, image=self.no_button_bg, bd=0, bg="#9ed2be")
+        self.false_button.place(x=87, y=488)
+
+        self.true_button = tk.Button(self, image=self.yes_button_bg, bd=0, bg="#9ed2be")
+        self.true_button.place(x=454, y=488)
         self.pack()
 
 
@@ -180,8 +272,31 @@ class PickCorrect(tk.Frame):
 
         self.background_image = PhotoImage(file=
                                            "./components/graphical_components/games/pick_correct/pick_correct_bg.png")
+        self.button_bg = PhotoImage(file="./components/graphical_components/games/pick_correct/button.png")
+        self.label_bg = PhotoImage(file="./components/graphical_components/games/pick_correct/label_bg.png")
         self.background = tk.Label(self, image=self.background_image)
         self.background.place(relwidth=1, relheight=1)
+
+        self.canvas = tk.Canvas(self, width=616, height=357, bg="#9ed2be", highlightthickness=0)
+        self.canvas_bg = self.canvas.create_image(0, 0, anchor=tk.NW, image=self.label_bg)
+        self.canvas.place(x=33, y=67)
+
+        self.word_to_display = tk.Label(
+            self.canvas,
+            text=key,
+            font=('Inter', 60, 'bold'),
+            background="#7eaa92",
+            fg="#FFD9B7",
+            wraplength=600
+        )
+
+        self.canvas.create_window(308, 178, window=self.word_to_display, anchor="center")
+
+        self.first_option = tk.Button(self, image=self.button_bg, bd=0, bg="#9ed2be")
+        self.first_option.place(x=76, y=466)
+        self.second_option = tk.Button(self, image=self.button_bg, bd=0, bg="#9ed2be")
+        self.second_option.place(x=76, y=560)
+
         self.pack()
 
 
