@@ -48,48 +48,41 @@ class LearningSession(tk.Toplevel):
                     other_frame.forget()
 
     def random_dict(self, consecutive_limit=3):
-        dict_choices = [
-            ("flashcard", self.flashcard_dict),
-            ("match_expression", self.match_expression_dict),
-            ("match_translation", self.match_translation_dict),
-            ("tf", self.tf_dict),
-            ("pick", self.pick_dict),
-            ("hangman", self.hangman_dict),
-        ]
+        # dict_choices = [
+        #     ("flashcard", self.flashcard_dict),
+        #     ("match_expression", self.match_expression_dict),
+        #     ("match_translation", self.match_translation_dict),
+        #     ("tf", self.tf_dict),
+        #     ("pick", self.pick_dict),
+        #     ("hangman", self.hangman_dict),
+        # ]
+        #
+        # available_dicts = [(name, dictionary) for name, dictionary in dict_choices if len(dictionary) > 0]
+        #
+        # if not available_dicts:
+        #     return None, None
+        #
+        # chosen_entry = None
+        # for _ in range(consecutive_limit):
+        #     chosen_entry = random.choice(available_dicts)
+        #     if chosen_entry != getattr(self, f"last_chosen_{chosen_entry[0]}", None):
+        #         break
+        #
+        # setattr(self, f"last_chosen_{chosen_entry[0]}", chosen_entry[0])
+        #
+        # return chosen_entry[1], chosen_entry[0]
+        #debug -------------------------
+        hangman_dict = self.hangman_dict
 
-        available_dicts = [(name, dictionary) for name, dictionary in dict_choices if len(dictionary) > 0]
-
-        if not available_dicts:
+        if len(hangman_dict) > 0:
+            return self.hangman_dict, "hangman"
+        else:
             return None, None
-
-        chosen_entry = None
-        for _ in range(consecutive_limit):
-            chosen_entry = random.choice(available_dicts)
-            if chosen_entry != getattr(self, f"last_chosen_{chosen_entry[0]}", None):
-                break
-
-        setattr(self, f"last_chosen_{chosen_entry[0]}", chosen_entry[0])
-
-        return chosen_entry[1], chosen_entry[0]
-        # debug -------------------------
-    #     hangman_dict = self.hangman_dict
-    #
-    #     if len(hangman_dict) > 0:
-    #         return self.tf_dict, "tf"
-    #     else:
-    #         return None, None
-    #
-    # def get_random_key_value(self):
-    #     if not self.chosen_dict:
-    #         return None, None
-    #
-    #     random_key = random.choice(list(self.chosen_dict.keys()))
-    #     random_value = self.chosen_dict[random_key]
-    #     return random_key, random_value
 
     def get_random_key_value(self):
         if not self.chosen_dict:
             return None, None
+
         random_key = random.choice(list(self.chosen_dict.keys()))
         random_value = self.chosen_dict[random_key]
         return random_key, random_value
@@ -309,6 +302,23 @@ class Hangman(tk.Frame):
 
         self.background_image = PhotoImage(file=
                                            "./components/graphical_components/games/hangman/hangman_bg.png")
+        self.label_bg = PhotoImage(file="./components/graphical_components/games/hangman/canvas_bg.png")
         self.background = tk.Label(self, image=self.background_image)
         self.background.place(relwidth=1, relheight=1)
+
+        self.canvas = tk.Canvas(self, width=544, height=307, bg="#9ED2BE", highlightthickness=0)
+        self.canvas_bg = self.canvas.create_image(0, 0, anchor=tk.NW, image=self.label_bg)
+        self.canvas.place(x=63, y=62)
+
+        self.word_to_display = tk.Label(
+            self.canvas,
+            text=key,
+            font=('Inter', 60, 'bold'),
+            background="#7eaa92",
+            fg="#FFD9B7",
+            wraplength=600
+        )
+
+        self.canvas.create_window(272, 153, window=self.word_to_display, anchor="center")
+
         self.pack()
