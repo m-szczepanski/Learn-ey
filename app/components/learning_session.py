@@ -72,9 +72,9 @@ class LearningSession(tk.Toplevel):
         #
         # return chosen_entry[1], chosen_entry[0]
         #debug -------------------------
-        hangman_dict = self.hangman_dict
+        dict = self.hangman_dict
 
-        if len(hangman_dict) > 0:
+        if len(dict) > 0:
             return self.hangman_dict, "hangman"
         else:
             return None, None
@@ -303,22 +303,36 @@ class Hangman(tk.Frame):
         self.background_image = PhotoImage(file=
                                            "./components/graphical_components/games/hangman/hangman_bg.png")
         self.label_bg = PhotoImage(file="./components/graphical_components/games/hangman/canvas_bg.png")
+
         self.background = tk.Label(self, image=self.background_image)
         self.background.place(relwidth=1, relheight=1)
 
-        self.canvas = tk.Canvas(self, width=544, height=307, bg="#9ED2BE", highlightthickness=0)
-        self.canvas_bg = self.canvas.create_image(0, 0, anchor=tk.NW, image=self.label_bg)
-        self.canvas.place(x=63, y=62)
 
-        self.word_to_display = tk.Label(
-            self.canvas,
-            text=key,
-            font=('Inter', 60, 'bold'),
-            background="#7eaa92",
-            fg="#FFD9B7",
-            wraplength=600
-        )
 
-        self.canvas.create_window(272, 153, window=self.word_to_display, anchor="center")
+        self.create_letter_buttons()
 
         self.pack()
+    def create_letter_buttons(self):
+        self.letter_button_bg = tk.PhotoImage(
+            file="./components/graphical_components/games/hangman/letter_button.png")
+        y_pos = [394, 445, 495]
+        buttons_x = [103, 151, 202, 250, 300, 350, 398, 451, 495, 546,
+                     129, 177, 227, 277, 324, 374, 424, 472, 523,
+                     179, 227, 276, 325, 374, 423, 471]
+
+        letters = ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Z',
+                   'X', 'C', 'V', 'B', 'N', 'M']
+
+        button_index = 0
+        button_counts = [10, 9, 7]
+
+        for i in range(3):
+            for j in range(button_counts[i]):
+                button = tk.Button(self, bd=0, bg="#C8E4B3", font=('Inter', 12, 'bold'),
+                                   fg="#FFFFFF", text=letters[button_index])
+                button.place(x=buttons_x[button_index], y=y_pos[i])
+
+                if button_index < len(letters):
+                    button.configure(text=letters[button_index])
+                    button_index += 1
+

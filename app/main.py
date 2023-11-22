@@ -226,7 +226,7 @@ class RightFrame(tk.Frame):
         self.timer_state_long_break_bg = PhotoImage(file="./components/graphical_components/pomodoro/long_break.png")
 
         self.status_label = tk.Label(self, image=self.timer_state_idle_bg, fg="#FFD9B7", background="#c8e4b2", bd=0)
-        self.status_label.place(x=50, y=333)
+        self.status_label.place(x=44, y=333)
 
         # Menu section
         self.main_panel_button_enabled = False
