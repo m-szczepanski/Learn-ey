@@ -39,6 +39,7 @@ class LearningSession(tk.Toplevel):
         self.frames["hangman"] = Hangman(self, key, value)
 
         self.show_frame(self.dict_name)
+        self.open_next_frame()
 
     def show_frame(self, frame_name):
         if frame := self.frames.get(frame_name):
@@ -87,6 +88,24 @@ class LearningSession(tk.Toplevel):
         random_key = random.choice(list(self.chosen_dict.keys()))
         random_value = self.chosen_dict[random_key]
         return random_key, random_value
+
+    def open_next_frame(self):
+        if current_frame := self.frames.get(self.dict_name):
+            current_frame.forget()
+
+        self.chosen_dict, self.dict_name = self.random_dict()
+        print("dict name: ", self.dict_name)
+
+        key, value = self.get_random_key_value()
+
+        self.frames["flashcard"] = Flashcard(self, key, value)
+        self.frames["match_expression"] = MatchExpression(self, key, value)
+        self.frames["match_translation"] = MatchTranslation(self, key, value)
+        self.frames["tf"] = TrueFalse(self, key, value)
+        self.frames["pick"] = PickCorrect(self, key, value)
+        self.frames["hangman"] = Hangman(self, key, value)
+
+        self.show_frame(self.dict_name)
 
 
 # todo elementy UI klas tk.Frame
@@ -404,13 +423,13 @@ class Hangman(tk.Frame):
     def check_game_over(self):
         if "_" not in self.display:
             # todo pass information to pointing system
-            # open next frame
             self.is_game_over = True
+            self.master.open_next_frame()
         elif self.lives == 0:
             messagebox.showinfo("Wrong", "Unfortunately you didn't guess the word")
             self.is_game_over = True
             # todo pass information to pointing system
-            # open next frame
+            self.master.open_next_frame()
 
     def switch(self, lives):
         hangman_images = {
