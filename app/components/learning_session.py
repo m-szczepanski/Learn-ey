@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import PhotoImage
 from app.functions.distribute_session_data import distribute_data_json
 import random
+from tkinter import messagebox
 
 
 class LearningSession(tk.Toplevel):
@@ -48,36 +49,36 @@ class LearningSession(tk.Toplevel):
                     other_frame.forget()
 
     def random_dict(self, consecutive_limit=3):
-        # dict_choices = [
-        #     ("flashcard", self.flashcard_dict),
-        #     ("match_expression", self.match_expression_dict),
-        #     ("match_translation", self.match_translation_dict),
-        #     ("tf", self.tf_dict),
-        #     ("pick", self.pick_dict),
-        #     ("hangman", self.hangman_dict),
-        # ]
-        #
-        # available_dicts = [(name, dictionary) for name, dictionary in dict_choices if len(dictionary) > 0]
-        #
-        # if not available_dicts:
-        #     return None, None
-        #
-        # chosen_entry = None
-        # for _ in range(consecutive_limit):
-        #     chosen_entry = random.choice(available_dicts)
-        #     if chosen_entry != getattr(self, f"last_chosen_{chosen_entry[0]}", None):
-        #         break
-        #
-        # setattr(self, f"last_chosen_{chosen_entry[0]}", chosen_entry[0])
-        #
-        # return chosen_entry[1], chosen_entry[0]
-        #debug -------------------------
-        dict = self.hangman_dict
+        dict_choices = [
+            ("flashcard", self.flashcard_dict),
+            ("match_expression", self.match_expression_dict),
+            ("match_translation", self.match_translation_dict),
+            ("tf", self.tf_dict),
+            ("pick", self.pick_dict),
+            ("hangman", self.hangman_dict),
+        ]
 
-        if len(dict) > 0:
-            return self.hangman_dict, "hangman"
-        else:
+        available_dicts = [(name, dictionary) for name, dictionary in dict_choices if len(dictionary) > 0]
+
+        if not available_dicts:
             return None, None
+
+        chosen_entry = None
+        for _ in range(consecutive_limit):
+            chosen_entry = random.choice(available_dicts)
+            if chosen_entry != getattr(self, f"last_chosen_{chosen_entry[0]}", None):
+                break
+
+        setattr(self, f"last_chosen_{chosen_entry[0]}", chosen_entry[0])
+
+        return chosen_entry[1], chosen_entry[0]
+        #debug -------------------------
+        # dict = self.hangman_dict
+        #
+        # if len(dict) > 0:
+        #     return self.hangman_dict, "hangman"
+        # else:
+        #     return None, None
 
     def get_random_key_value(self):
         if not self.chosen_dict:
@@ -298,23 +299,67 @@ class Hangman(tk.Frame):
         super().__init__(parent)
         self.key = key
         self.value = value
+        self.lives = 6
+        self.is_game_over = False
+        self.user_guesses = []
         self.configure(width=681, height=686)
 
         self.background_image = PhotoImage(file=
                                            "./components/graphical_components/games/hangman/hangman_bg.png")
         self.label_bg = PhotoImage(file="./components/graphical_components/games/hangman/canvas_bg.png")
 
+        # hangman states
+        self.hangman_none = PhotoImage(file="./components/graphical_components/games/hangman/none.png")
+        self.hangman_head = PhotoImage(file="./components/graphical_components/games/hangman/head.png")
+        self.hangman_body = PhotoImage(file="./components/graphical_components/games/hangman/body.png")
+        self.hangman_hand = PhotoImage(file="./components/graphical_components/games/hangman/hand.png")
+        self.hangman_hands = PhotoImage(file="./components/graphical_components/games/hangman/hands.png")
+        self.hangman_leg = PhotoImage(file="./components/graphical_components/games/hangman/leg.png")
+        self.hangman_whole = PhotoImage(file="./components/graphical_components/games/hangman/whole.png")
+
         self.background = tk.Label(self, image=self.background_image)
         self.background.place(relwidth=1, relheight=1)
 
+        self.canvas = tk.Canvas(self, width=326, height=307, bg="#7EAA92", highlightthickness=0, bd=0)
+        self.canvas_bg = self.canvas.create_image(0, 0, anchor=tk.W, image=self.label_bg)
+        self.canvas.place(x=66, y=68)
 
+        self.word_to_display = tk.Label(
+            self.canvas,
+            text=value,
+            font=('Inter', 40, 'normal'),
+            background="#7eaa92",
+            fg="#FFD9B7",
+            wraplength=600
+        )
+
+        self.canvas.create_window(163, 153, window=self.word_to_display, anchor="center")
+
+        self.hangman_image = tk.Label(self, bd=2, bg="#7EAA92")
+        self.hangman_image.place(x=382, y=68)
+
+        self.word_length = len(key)
+        self.display = []
+        for _ in range(self.word_length):
+            self.display += "_"
+
+        self.dotted_txt = ' '.join(self.display)
+
+        self.dotted_word = tk.Label(self, text=self.dotted_txt, bd=0, bg="#7EAA92", fg="#FFD9B7",
+                                    font=('Inter', 30, 'normal'))
+        dotted_word_width = self.dotted_word.winfo_reqwidth()
+
+        element_x = 63
+        element_width = 544
+        dotted_word_x = element_x + (element_width - dotted_word_width) / 2
+
+        self.dotted_word.place(x=dotted_word_x, y=591)
 
         self.create_letter_buttons()
 
         self.pack()
+
     def create_letter_buttons(self):
-        self.letter_button_bg = tk.PhotoImage(
-            file="./components/graphical_components/games/hangman/letter_button.png")
         y_pos = [394, 445, 495]
         buttons_x = [103, 151, 202, 250, 300, 350, 398, 451, 495, 546,
                      129, 177, 227, 277, 324, 374, 424, 472, 523,
@@ -327,12 +372,59 @@ class Hangman(tk.Frame):
         button_counts = [10, 9, 7]
 
         for i in range(3):
-            for j in range(button_counts[i]):
-                button = tk.Button(self, bd=0, bg="#C8E4B3", font=('Inter', 12, 'bold'),
-                                   fg="#FFFFFF", text=letters[button_index])
+            for _ in range(button_counts[i]):
+                button = tk.Button(self, bd=0, bg="#C8E4B3", font=('Inter', 12, 'bold'), fg="#FFFFFF",
+                                   text=letters[button_index], command=lambda char=letters[button_index].lower():
+                                   self.button_press(char))
                 button.place(x=buttons_x[button_index], y=y_pos[i])
 
                 if button_index < len(letters):
                     button.configure(text=letters[button_index])
                     button_index += 1
 
+    def button_press(self, char):
+        self.user_guesses.append(char)
+        self.check_letter(char)
+
+    def check_letter(self, char):
+        if char in self.key:
+            for i, letter in enumerate(self.key):
+                if letter == char:
+                    self.display[i] = char
+            self.update_display()
+        else:
+            self.lives -= 1
+            self.switch(self.lives)
+        self.check_game_over()
+
+    def update_display(self):
+        self.dotted_txt = ' '.join(self.display)
+        self.dotted_word.config(text=self.dotted_txt)
+
+    def check_game_over(self):
+        if "_" not in self.display:
+            # todo pass information to pointing system
+            # open next frame
+            self.is_game_over = True
+        elif self.lives == 0:
+            messagebox.showinfo("Wrong", "Unfortunately you didn't guess the word")
+            self.is_game_over = True
+            # todo pass information to pointing system
+            # open next frame
+
+    def switch(self, lives):
+        hangman_images = {
+            6: self.hangman_none,
+            5: self.hangman_head,
+            4: self.hangman_body,
+            3: self.hangman_hand,
+            2: self.hangman_hands,
+            1: self.hangman_leg,
+            0: self.hangman_whole
+        }
+        image_to_display = hangman_images.get(lives)
+
+        if image_to_display is not None:
+            self.hangman_image.configure(image=image_to_display)
+        else:
+            EOFError()
