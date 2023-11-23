@@ -51,35 +51,35 @@ class LearningSession(tk.Toplevel):
                     other_frame.forget()
 
     def random_dict(self, consecutive_limit=3):
-        # dict_choices = [
-        #     ("flashcard", self.flashcard_dict),
-        #     ("match_expression", self.match_expression_dict),
-        #     ("match_translation", self.match_translation_dict),
-        #     ("tf", self.tf_dict),
-        #     ("pick", self.pick_dict),
-        #     ("hangman", self.hangman_dict),
-        # ]
-        # available_dicts = [(name, dictionary) for name, dictionary in dict_choices if len(dictionary) > 0]
-        #
-        # if not available_dicts:
-        #     return None, None
-        #
-        # chosen_entry = None
-        # for _ in range(consecutive_limit):
-        #     chosen_entry = random.choice(available_dicts)
-        #     if chosen_entry != getattr(self, f"last_chosen_{chosen_entry[0]}", None):
-        #         break
-        #
-        # setattr(self, f"last_chosen_{chosen_entry[0]}", chosen_entry[0])
-        #
-        # return chosen_entry[1], chosen_entry[0]
-        # debug -------------------------
-        dict = self.pick_dict
+        dict_choices = [
+            ("flashcard", self.flashcard_dict),
+            ("match_expression", self.match_expression_dict),
+            ("match_translation", self.match_translation_dict),
+            ("tf", self.tf_dict),
+            ("pick", self.pick_dict),
+            ("hangman", self.hangman_dict),
+        ]
+        available_dicts = [(name, dictionary) for name, dictionary in dict_choices if len(dictionary) > 0]
 
-        if len(dict) > 0:
-            return self.pick_dict, "pick"
-        else:
+        if not available_dicts:
             return None, None
+
+        chosen_entry = None
+        for _ in range(consecutive_limit):
+            chosen_entry = random.choice(available_dicts)
+            if chosen_entry != getattr(self, f"last_chosen_{chosen_entry[0]}", None):
+                break
+
+        setattr(self, f"last_chosen_{chosen_entry[0]}", chosen_entry[0])
+
+        return chosen_entry[1], chosen_entry[0]
+        # debug -------------------------
+        # dict = self.pick_dict
+        #
+        # if len(dict) > 0:
+        #     return self.pick_dict, "pick"
+        # else:
+        #     return None, None
 
     def get_random_key_value(self):
         if not self.chosen_dict:
@@ -159,7 +159,7 @@ class Flashcard(tk.Frame):
         self.canvas = tk.Canvas(self, width=616, height=311, bg="#9ed2be", highlightthickness=0)
         self.canvas_bg = self.canvas.create_image(0, 0, anchor=tk.NW, image=self.flashcard_front_bg)
 
-        self.card_word = self.canvas.create_text(300, 163, text="word", font=("Inter", 70, "bold"), fill="#FFFFFF")
+        self.card_word = self.canvas.create_text(300, 163, text=self.key, font=("Inter", 70, "bold"), fill="#FFFFFF")
         self.canvas.place(x=32, y=62)
 
         self.flip_button = tk.Button(self, image=self.flip_button_bg, command=self.flip_card, bd=0, bg="#9ED2BE")
@@ -230,8 +230,11 @@ class MatchExpression(tk.Frame):
         self.canvas.create_window(308, 178, window=self.word_to_display, anchor="center")
 
         self.answer_a = tk.Button(self, bd=0, bg="#7EAA92", fg="#FFFFFF", font=('Inter', 16, 'bold'), width=30)
+        self.answer_a.place(x=140, y=444)
         self.answer_b = tk.Button(self, bd=0, bg="#7EAA92", fg="#FFFFFF", font=('Inter', 16, 'bold'), width=30)
+        self.answer_b.place(x=140, y=516)
         self.answer_c = tk.Button(self, bd=0, bg="#7EAA92", fg="#FFFFFF", font=('Inter', 16, 'bold'), width=30)
+        self.answer_c.place(x=140, y=589)
 
         self.place_answers()
         self.pack()
@@ -240,34 +243,34 @@ class MatchExpression(tk.Frame):
         random_number = random.randint(0, 2)
 
         if random_number == 0:
-            self.answer_a.configure(text=self.key)
-            self.answer_b.configure(text=self.wrong_answers[0])
-            self.answer_c.configure(text=self.wrong_answers[1])
+            self.answer_a.configure(text=self.key, command=lambda: self.pick_answer(1))
+            self.answer_b.configure(text=self.wrong_answers[0], command=lambda: self.pick_answer(0))
+            self.answer_c.configure(text=self.wrong_answers[1], command=lambda: self.pick_answer(0))
         elif random_number == 1:
-            self.answer_b.configure(text=self.key)
-            self.answer_a.configure(text=self.wrong_answers[0])
-            self.answer_c.configure(text=self.wrong_answers[1])
+            self.answer_b.configure(text=self.key, command=lambda: self.pick_answer(1))
+            self.answer_a.configure(text=self.wrong_answers[0], command=lambda: self.pick_answer(0))
+            self.answer_c.configure(text=self.wrong_answers[1], command=lambda: self.pick_answer(0))
         elif random_number == 2:
-            self.answer_c.configure(text=self.key)
-            self.answer_a.configure(text=self.wrong_answers[0])
-            self.answer_b.configure(text=self.wrong_answers[1])
+            self.answer_c.configure(text=self.key, command=lambda: self.pick_answer(1))
+            self.answer_a.configure(text=self.wrong_answers[0], command=lambda: self.pick_answer(0))
+            self.answer_b.configure(text=self.wrong_answers[1], command=lambda: self.pick_answer(0))
 
-        self.center_buttons_text_horizontally()
+        self.center_text_horizontally()
 
-    def center_text_horizontally(self, button, y_pos):
-        button.update_idletasks()  # Potrzebne do uzyskania dokładnych wymiarów przycisku po umieszczeniu na widżecie
+    def center_text_horizontally(self):
+        canvas_width = 616
 
-        text_width = button.winfo_width()  # Szerokość przycisku
-        button_width = button.winfo_reqwidth()  # Wymagana szerokość przycisku
+        word_to_display = self.word_to_display.winfo_reqwidth()
+        word_x_offset = (canvas_width - word_to_display) / 2
 
-        x_offset = (5 - text_width) / 2
+        self.word_to_display.place(x=word_x_offset, y=178, anchor=tk.W)
 
-        button.place(x=x_offset, y=y_pos, relx=0.5, anchor=tk.CENTER)
-
-    def center_buttons_text_horizontally(self):
-        self.center_text_horizontally(self.answer_a, 464)
-        self.center_text_horizontally(self.answer_b, 535)
-        self.center_text_horizontally(self.answer_c, 609)
+    def pick_answer(self, answer):
+        # todo pass value to pointing system
+        if answer:
+            print("yay 1 point")
+        else:
+            print("0 points")
 
 
 class MatchTranslation(tk.Frame):
