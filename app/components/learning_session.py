@@ -51,35 +51,35 @@ class LearningSession(tk.Toplevel):
                     other_frame.forget()
 
     def random_dict(self, consecutive_limit=3):
-        # dict_choices = [
-        #     ("flashcard", self.flashcard_dict),
-        #     ("match_expression", self.match_expression_dict),
-        #     ("match_translation", self.match_translation_dict),
-        #     ("tf", self.tf_dict),
-        #     ("pick", self.pick_dict),
-        #     ("hangman", self.hangman_dict),
-        # ]
-        # available_dicts = [(name, dictionary) for name, dictionary in dict_choices if len(dictionary) > 0]
-        #
-        # if not available_dicts:
-        #     return None, None
-        #
-        # chosen_entry = None
-        # for _ in range(consecutive_limit):
-        #     chosen_entry = random.choice(available_dicts)
-        #     if chosen_entry != getattr(self, f"last_chosen_{chosen_entry[0]}", None):
-        #         break
-        #
-        # setattr(self, f"last_chosen_{chosen_entry[0]}", chosen_entry[0])
-        #
-        # return chosen_entry[1], chosen_entry[0]
-        # debug -------------------------
-        dict = self.hangman_dict
+        dict_choices = [
+            ("flashcard", self.flashcard_dict),
+            ("match_expression", self.match_expression_dict),
+            ("match_translation", self.match_translation_dict),
+            ("tf", self.tf_dict),
+            ("pick", self.pick_dict),
+            ("hangman", self.hangman_dict),
+        ]
+        available_dicts = [(name, dictionary) for name, dictionary in dict_choices if len(dictionary) > 0]
 
-        if len(dict) > 0:
-            return self.match_expression_dict, "match_expression"
-        else:
+        if not available_dicts:
             return None, None
+
+        chosen_entry = None
+        for _ in range(consecutive_limit):
+            chosen_entry = random.choice(available_dicts)
+            if chosen_entry != getattr(self, f"last_chosen_{chosen_entry[0]}", None):
+                break
+
+        setattr(self, f"last_chosen_{chosen_entry[0]}", chosen_entry[0])
+
+        return chosen_entry[1], chosen_entry[0]
+        # debug -------------------------
+        # dict = self.hangman_dict
+        #
+        # if len(dict) > 0:
+        #     return self.match_translation_dict, "match_translation"
+        # else:
+        #     return None, None
 
     def get_random_key_value(self):
         if not self.chosen_dict:
@@ -193,7 +193,6 @@ class MatchExpression(tk.Frame):
 
         self.background_image = PhotoImage(file="./components/graphical_components/games/match_expression/"
                                            "match_expression_bg.png")
-        self.button_bg = PhotoImage(file="./components/graphical_components/games/match_expression/button_bg.png")
         self.label_bg = PhotoImage(file="./components/graphical_components/games/pick_correct/label_bg.png")
 
         self.background = tk.Label(self, image=self.background_image)
@@ -272,14 +271,13 @@ class MatchTranslation(tk.Frame):
         self.background_image = PhotoImage(file=
                                            "./components/graphical_components/games/match_translation/"
                                            "match_translation_bg.png")
-        self.button_bg = PhotoImage(file="./components/graphical_components/games/match_translation/button_bg.png")
         self.label_bg = PhotoImage(file="./components/graphical_components/games/pick_correct/label_bg.png")
         self.background = tk.Label(self, image=self.background_image)
         self.background.place(relwidth=1, relheight=1)
 
         self.canvas = tk.Canvas(self, width=616, height=357, bg="#9ed2be", highlightthickness=0)
         self.canvas_bg = self.canvas.create_image(0, 0, anchor=tk.NW, image=self.label_bg)
-        self.canvas.place(x=33, y=67)
+        self.canvas.place(x=33, y=64)
 
         self.word_to_display = tk.Label(
             self.canvas,
@@ -292,15 +290,50 @@ class MatchTranslation(tk.Frame):
 
         self.canvas.create_window(308, 178, window=self.word_to_display, anchor="center")
 
-        self.answer_a = tk.Button(self, image=self.button_bg, bd=0, bg="#9ed2be")
-        self.answer_a.place(x=41, y=455)
-        self.answer_b = tk.Button(self, image=self.button_bg, bd=0, bg="#9ed2be")
-        self.answer_b.place(x=365, y=455)
-        self.answer_c = tk.Button(self, image=self.button_bg, bd=0, bg="#9ed2be")
-        self.answer_c.place(x=41, y=563)
-        self.answer_d = tk.Button(self, image=self.button_bg, bd=0, bg="#9ed2be")
-        self.answer_d.place(x=365, y=563)
+        self.answer_a = tk.Button(self, bd=0, bg="#7EAA92", fg="#FFFFFF", font=('Inter', 20, 'bold'), width=14)
+        self.answer_a.place(x=58, y=466)
+        self.answer_b = tk.Button(self, bd=0, bg="#7EAA92", fg="#FFFFFF", font=('Inter', 20, 'bold'), width=14)
+        self.answer_b.place(x=382, y=466)
+        self.answer_c = tk.Button(self, bd=0, bg="#7EAA92", fg="#FFFFFF", font=('Inter', 20, 'bold'), width=14)
+        self.answer_c.place(x=58, y=574)
+        self.answer_d = tk.Button(self, bd=0, bg="#7EAA92", fg="#FFFFFF", font=('Inter', 20, 'bold'), width=14)
+        self.answer_d.place(x=382, y=574)
+
+        self.place_answers()
         self.pack()
+
+    def place_answers(self):
+        random_number = random.randint(0, 3)
+
+        if random_number == 0:
+            self.answer_a.configure(text=self.key, command=lambda: self.pick_answer(1))
+            self.answer_b.configure(text=self.wrong_answers[0], command=lambda: self.pick_answer(0))
+            self.answer_c.configure(text=self.wrong_answers[1], command=lambda: self.pick_answer(0))
+            self.answer_d.configure(text=self.wrong_answers[2], command=lambda: self.pick_answer(0))
+        elif random_number == 1:
+            self.answer_b.configure(text=self.key, command=lambda: self.pick_answer(1))
+            self.answer_a.configure(text=self.wrong_answers[0], command=lambda: self.pick_answer(0))
+            self.answer_c.configure(text=self.wrong_answers[1], command=lambda: self.pick_answer(0))
+            self.answer_d.configure(text=self.wrong_answers[2], command=lambda: self.pick_answer(0))
+        elif random_number == 2:
+            self.answer_c.configure(text=self.key, command=lambda: self.pick_answer(1))
+            self.answer_a.configure(text=self.wrong_answers[0], command=lambda: self.pick_answer(0))
+            self.answer_b.configure(text=self.wrong_answers[1], command=lambda: self.pick_answer(0))
+            self.answer_d.configure(text=self.wrong_answers[2], command=lambda: self.pick_answer(0))
+        elif random_number == 3:
+            self.answer_d.configure(text=self.key, command=lambda: self.pick_answer(1))
+            self.answer_a.configure(text=self.wrong_answers[0], command=lambda: self.pick_answer(0))
+            self.answer_b.configure(text=self.wrong_answers[1], command=lambda: self.pick_answer(0))
+            self.answer_c.configure(text=self.wrong_answers[2], command=lambda: self.pick_answer(0))
+
+    def pick_answer(self, answer):
+        # todo pass value to pointing system
+        if answer == 1:
+            print("yay 1 point")
+        else:
+            print("0 points :/")
+
+        self.master.open_next_frame()
 
 
 class TrueFalse(tk.Frame):
