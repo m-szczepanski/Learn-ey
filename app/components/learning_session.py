@@ -74,10 +74,10 @@ class LearningSession(tk.Toplevel):
         #
         # return chosen_entry[1], chosen_entry[0]
         # debug -------------------------
-        dict = self.tf_dict
+        dict = self.pick_dict
 
         if len(dict) > 0:
-            return self.tf_dict, "tf"
+            return self.pick_dict, "pick"
         else:
             return None, None
 
@@ -230,11 +230,8 @@ class MatchExpression(tk.Frame):
         self.canvas.create_window(308, 178, window=self.word_to_display, anchor="center")
 
         self.answer_a = tk.Button(self, bd=0, bg="#7EAA92", fg="#FFFFFF", font=('Inter', 16, 'bold'), width=30)
-        #self.answer_a.place(x=279, y=444)
         self.answer_b = tk.Button(self, bd=0, bg="#7EAA92", fg="#FFFFFF", font=('Inter', 16, 'bold'), width=30)
-        #self.answer_b.place(x=279, y=515)
         self.answer_c = tk.Button(self, bd=0, bg="#7EAA92", fg="#FFFFFF", font=('Inter', 16, 'bold'), width=30)
-        #self.answer_c.place(x=279, y=589)
 
         self.place_answers()
         self.pack()
@@ -457,7 +454,6 @@ class PickCorrect(tk.Frame):
 
         self.background_image = PhotoImage(file=
                                            "./components/graphical_components/games/pick_correct/pick_correct_bg.png")
-        self.button_bg = PhotoImage(file="./components/graphical_components/games/pick_correct/button.png")
         self.label_bg = PhotoImage(file="./components/graphical_components/games/pick_correct/label_bg.png")
         self.background = tk.Label(self, image=self.background_image)
         self.background.place(relwidth=1, relheight=1)
@@ -465,6 +461,15 @@ class PickCorrect(tk.Frame):
         self.canvas = tk.Canvas(self, width=616, height=357, bg="#9ed2be", highlightthickness=0)
         self.canvas_bg = self.canvas.create_image(0, 0, anchor=tk.NW, image=self.label_bg)
         self.canvas.place(x=33, y=67)
+
+        self.game_title = tk.Label(
+            self.canvas,
+            text="Which one is correct?",
+            font=('Inter', 28, 'normal'),
+            background="#7eaa92",
+            fg="#FFFFFF",
+            wraplength=600
+        )
 
         self.word_to_display = tk.Label(
             self.canvas,
@@ -475,14 +480,49 @@ class PickCorrect(tk.Frame):
             wraplength=600
         )
 
+        self.canvas.create_window(308, 15, window=self.game_title, anchor="center")
         self.canvas.create_window(308, 178, window=self.word_to_display, anchor="center")
 
-        self.first_option = tk.Button(self, image=self.button_bg, bd=0, bg="#9ed2be")
-        self.first_option.place(x=76, y=466)
-        self.second_option = tk.Button(self, image=self.button_bg, bd=0, bg="#9ed2be")
-        self.second_option.place(x=76, y=560)
+        self.first_option = tk.Button(self, bd=0, bg="#7EAA92", fg="#FFFFFF", font=('Inter', 20, 'bold'), width=28)
+        self.first_option.place(x=95, y=473)
+        self.second_option = tk.Button(self, bd=0, bg="#7EAA92", fg="#FFFFFF", font=('Inter', 20, 'bold'), width=28)
+        self.second_option.place(x=95, y=567)
+
+        self.center_elements_horizontally()
+        self.place_answers()
 
         self.pack()
+
+    def center_elements_horizontally(self):
+        canvas_width = 616
+
+        title_width = self.game_title.winfo_reqwidth()
+        key_width = self.word_to_display.winfo_reqwidth()
+
+        title_x_offset = (canvas_width - title_width) / 2
+        key_x_offset = (canvas_width - key_width) / 2
+
+        self.game_title.place(x=title_x_offset, y=18, anchor=tk.W)
+        self.word_to_display.place(x=key_x_offset, y=178, anchor=tk.W)
+
+    def place_answers(self):
+        random_number = random.randint(0, 1)
+
+        if random_number == 0:
+            self.first_option.configure(text=self.value, command=lambda: self.pick_answer(1))
+            self.second_option.configure(text=self.wrong_answers[0], command=lambda: self.pick_answer(0))
+        elif random_number == 1:
+            self.second_option.configure(text=self.value, command=lambda: self.pick_answer(1))
+            self.first_option.configure(text=self.wrong_answers[0], command=lambda: self.pick_answer(0))
+
+    def pick_answer(self, answer):
+        # todo pass value to pointing system
+        if answer == 1:
+            print("yay 1 point")
+        else:
+            print("0 points :/")
+
+        self.master.open_next_frame()
 
 
 class Hangman(tk.Frame):
