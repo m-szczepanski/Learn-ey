@@ -35,7 +35,7 @@ class LearningSession(tk.Toplevel):
         self.frames["flashcard"] = Flashcard(self, key, value)
         self.frames["match_expression"] = MatchExpression(self, key, value, wrong_answers)
         self.frames["match_translation"] = MatchTranslation(self, key, value, wrong_answers)
-        self.frames["tf"] = TrueFalse(self, key, value)
+        self.frames["tf"] = TrueFalse(self, key, value, wrong_answers)
         self.frames["pick"] = PickCorrect(self, key, value, wrong_answers)
         self.frames["hangman"] = Hangman(self, key, value)
 
@@ -51,35 +51,35 @@ class LearningSession(tk.Toplevel):
                     other_frame.forget()
 
     def random_dict(self, consecutive_limit=3):
-        dict_choices = [
-            ("flashcard", self.flashcard_dict),
-            ("match_expression", self.match_expression_dict),
-            ("match_translation", self.match_translation_dict),
-            ("tf", self.tf_dict),
-            ("pick", self.pick_dict),
-            ("hangman", self.hangman_dict),
-        ]
-        available_dicts = [(name, dictionary) for name, dictionary in dict_choices if len(dictionary) > 0]
-
-        if not available_dicts:
-            return None, None
-
-        chosen_entry = None
-        for _ in range(consecutive_limit):
-            chosen_entry = random.choice(available_dicts)
-            if chosen_entry != getattr(self, f"last_chosen_{chosen_entry[0]}", None):
-                break
-
-        setattr(self, f"last_chosen_{chosen_entry[0]}", chosen_entry[0])
-
-        return chosen_entry[1], chosen_entry[0]
-        # debug -------------------------
-        # dict = self.hangman_dict
+        # dict_choices = [
+        #     ("flashcard", self.flashcard_dict),
+        #     ("match_expression", self.match_expression_dict),
+        #     ("match_translation", self.match_translation_dict),
+        #     ("tf", self.tf_dict),
+        #     ("pick", self.pick_dict),
+        #     ("hangman", self.hangman_dict),
+        # ]
+        # available_dicts = [(name, dictionary) for name, dictionary in dict_choices if len(dictionary) > 0]
         #
-        # if len(dict) > 0:
-        #     return self.match_translation_dict, "match_translation"
-        # else:
+        # if not available_dicts:
         #     return None, None
+        #
+        # chosen_entry = None
+        # for _ in range(consecutive_limit):
+        #     chosen_entry = random.choice(available_dicts)
+        #     if chosen_entry != getattr(self, f"last_chosen_{chosen_entry[0]}", None):
+        #         break
+        #
+        # setattr(self, f"last_chosen_{chosen_entry[0]}", chosen_entry[0])
+        #
+        # return chosen_entry[1], chosen_entry[0]
+        # debug -------------------------
+        dict = self.tf_dict
+
+        if len(dict) > 0:
+            return self.tf_dict, "tf"
+        else:
+            return None, None
 
     def get_random_key_value(self):
         if not self.chosen_dict:
@@ -127,7 +127,7 @@ class LearningSession(tk.Toplevel):
         self.frames["flashcard"] = Flashcard(self, key, value)
         self.frames["match_expression"] = MatchExpression(self, key, value, wrong_answers)
         self.frames["match_translation"] = MatchTranslation(self, key, value, wrong_answers)
-        self.frames["tf"] = TrueFalse(self, key, value)
+        self.frames["tf"] = TrueFalse(self, key, value, wrong_answers)
         self.frames["pick"] = PickCorrect(self, key, value, wrong_answers)
         self.frames["hangman"] = Hangman(self, key, value)
 
@@ -135,7 +135,6 @@ class LearningSession(tk.Toplevel):
 
 
 # todo elementy UI klas tk.Frame
-# todo do parametrów dodać jescze jeden, który jest arrayem zawierającym niepoprawne odpowiedzi
 
 class Flashcard(tk.Frame):
     def __init__(self, parent, key, value):
@@ -159,28 +158,43 @@ class Flashcard(tk.Frame):
 
         self.canvas = tk.Canvas(self, width=616, height=311, bg="#9ed2be", highlightthickness=0)
         self.canvas_bg = self.canvas.create_image(0, 0, anchor=tk.NW, image=self.flashcard_front_bg)
-        self.card_language = self.canvas.create_text(300, 50, text="Language", font=("Inter", 30, "normal"),
-                                                     fill="#FFD9B7")
+
         self.card_word = self.canvas.create_text(300, 163, text="word", font=("Inter", 70, "bold"), fill="#FFFFFF")
         self.canvas.place(x=32, y=62)
 
-        self.flip_button = tk.Button(self, image=self.flip_button_bg, command=self.test, bd=0, bg="#9ED2BE")
+        self.flip_button = tk.Button(self, image=self.flip_button_bg, command=self.flip_card, bd=0, bg="#9ED2BE")
         self.flip_button.place(x=248, y=398)
 
-        self.unknown_button = tk.Button(self, image=self.no_button_bg, command=lambda: self.test(),
+        self.unknown_button = tk.Button(self, image=self.no_button_bg, command=lambda: self.check_answer(0),
                                         bd=0, bg="#9ED2BE")
         self.unknown_button.place(x=82, y=488)
 
-        self.known_button = tk.Button(self, image=self.yes_button_bg, command=self.test, bd=0, bg="#9ED2BE")
+        self.known_button = tk.Button(self, image=self.yes_button_bg, command=lambda: self.check_answer(1), bd=0, bg="#9ED2BE")
         self.known_button.place(x=448, y=488)
 
-        self.current_card = {}
         self.unknown = {}
 
         print(self.key, self.value)
 
-    def test(self):
-        pass
+    def flip_card(self):
+        if self.key:
+            if self.canvas.itemcget(self.canvas_bg, "image") == str(self.flashcard_front_bg):
+                # If the card is faced upwards, flip to the backside
+                self.canvas.itemconfig(self.canvas_bg, image=self.flashcard_back_bg)
+                self.canvas.itemconfig(self.card_word, text=self.value, fill="#7eaa92")
+            else:
+                # If the card is faced downwards, flip to the front-side
+                self.canvas.itemconfig(self.canvas_bg, image=self.flashcard_front_bg)
+                self.canvas.itemconfig(self.card_word, text=self.key, fill="white")
+
+    def check_answer(self, answer):
+        # todo pass value to pointing system
+        if answer == 1:
+            print("yay 1 point")
+        else:
+            print("0 points :/")
+
+        self.master.open_next_frame()
 
 
 class MatchExpression(tk.Frame):
@@ -337,10 +351,11 @@ class MatchTranslation(tk.Frame):
 
 
 class TrueFalse(tk.Frame):
-    def __init__(self, parent, key, value):
+    def __init__(self, parent, key, value, list_of_wrong_answers):
         super().__init__(parent)
         self.key = key
         self.value = value
+        self.wrong_answers = list_of_wrong_answers
         self.configure(width=681, height=686)
 
         self.background_image = PhotoImage(file=
@@ -355,23 +370,81 @@ class TrueFalse(tk.Frame):
         self.canvas_bg = self.canvas.create_image(0, 0, anchor=tk.NW, image=self.label_bg)
         self.canvas.place(x=33, y=67)
 
-        self.word_to_display = tk.Label(
+        self.key_to_display = tk.Label(
             self.canvas,
             text=key,
             font=('Inter', 60, 'bold'),
+            background="#7eaa92",
+            fg="#FFFFFF",
+            wraplength=600
+        )
+
+        self.equals = tk.Label(
+            self.canvas,
+            text="is",
+            font=('Inter', 48, 'normal'),
             background="#7eaa92",
             fg="#FFD9B7",
             wraplength=600
         )
 
-        self.canvas.create_window(308, 178, window=self.word_to_display, anchor="center")
+        self.value_to_display = tk.Label(
+            self.canvas,
+            text="",
+            font=('Inter', 60, 'bold'),
+            background="#7eaa92",
+            fg="#FFFFFF",
+            wraplength=600
+        )
+
+        self.canvas.create_window(90, 64, window=self.key_to_display, anchor="center")
+        self.canvas.create_window(316, 178, window=self.equals, anchor="center")
+        self.canvas.create_window(87, 254, window=self.value_to_display, anchor="center")
 
         self.false_button = tk.Button(self, image=self.no_button_bg, bd=0, bg="#9ed2be")
         self.false_button.place(x=87, y=488)
 
         self.true_button = tk.Button(self, image=self.yes_button_bg, bd=0, bg="#9ed2be")
         self.true_button.place(x=454, y=488)
+
+        self.create_question()
+        self.center_elements_horizontally()
         self.pack()
+
+    def center_elements_horizontally(self):
+        canvas_width = 616
+
+        key_width = self.key_to_display.winfo_reqwidth()
+        equals_width = self.equals.winfo_reqwidth()
+        value_width = self.value_to_display.winfo_reqwidth()
+
+        key_x_offset = (canvas_width - key_width) / 2
+        equals_x_offset = (canvas_width - equals_width) / 2
+        value_x_offset = (canvas_width - value_width) / 2
+
+        self.key_to_display.place(x=key_x_offset, y=64, anchor=tk.W)
+        self.equals.place(x=equals_x_offset, y=178, anchor=tk.W)
+        self.value_to_display.place(x=value_x_offset, y=269, anchor=tk.W)
+
+    def create_question(self):
+        random_number = random.randint(0, 1)
+        if random_number == 0:
+            self.value_to_display.configure(text=self.value)
+            self.false_button.configure(command=lambda: self.pick_answer(0))
+            self.true_button.configure(command=lambda: self.pick_answer(1))
+        else:
+            self.value_to_display.configure(text=self.wrong_answers[0])
+            self.false_button.configure(command=lambda: self.pick_answer(1))
+            self.true_button.configure(command=lambda: self.pick_answer(0))
+
+    def pick_answer(self, answer):
+        # todo pass value to pointing system
+        if answer == 1:
+            print("yay 1 point")
+        else:
+            print("0 points :/")
+
+        self.master.open_next_frame()
 
 
 class PickCorrect(tk.Frame):
