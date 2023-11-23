@@ -150,7 +150,7 @@ class LeftFrame(tk.Frame):
 
         for i, session in enumerate(saved_sessions):
             session_label = tk.Button(self, image=self.session_bg, background="#9ed2be", bd=0,
-                                      command=lambda: open_learning_session(session[:-5]))
+                                      command=lambda session=session: open_learning_session(session[:-5]))
             session_label.place(x=panels_position_x[i], y=panels_position_y[i])
 
             session_name = tk.Label(self, background="#7EAA92", font=('Inter', 30, "bold"), fg="#FFD9B7", bd=0,
