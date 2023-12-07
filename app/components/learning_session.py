@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import PhotoImage
 from app.functions.distribute_session_data import distribute_data_json
+from app.functions.open_session_report import open_session_report
 import random
 from tkinter import messagebox
 
@@ -19,15 +20,26 @@ class LearningSession(tk.Toplevel):
         (self.flashcard_dict, self.match_expression_dict, self.match_translation_dict, self.tf_dict, self.pick_dict,
          self.hangman_dict) = distribute_data_json(self.learning_session)
         # debug
-        print("flashcard: ", self.flashcard_dict)
-        print("match_expression: ", self.match_expression_dict)
-        print("match_translation: ", self.match_translation_dict)
-        print("tf: ", self.tf_dict)
-        print("pick: ", self.pick_dict)
-        print("hangman: ", self.hangman_dict)
+        # print("flashcard: ", self.flashcard_dict)
+        # print("match_expression: ", self.match_expression_dict)
+        # print("match_translation: ", self.match_translation_dict)
+        # print("tf: ", self.tf_dict)
+        # print("pick: ", self.pick_dict)
+        # print("hangman: ", self.hangman_dict)
+
+        self.session_len = 0
+        for dictionary in (self.flashcard_dict, self.match_expression_dict, self.match_translation_dict, self.tf_dict,
+                           self.pick_dict, self.hangman_dict):
+            self.session_len += len(dictionary)
+
+        print("len of session: ", self.session_len)
 
         self.chosen_dict, self.dict_name = self.random_dict()
+
         print("dict name: ", self.dict_name)
+
+        self.previous_keys = []
+        self.wrong_answers = {}
 
         key, value = self.get_random_key_value()
         wrong_answers = self.get_different_values(value, self.chosen_dict, 3)
@@ -72,7 +84,19 @@ class LearningSession(tk.Toplevel):
 
         setattr(self, f"last_chosen_{chosen_entry[0]}", chosen_entry[0])
 
-        return chosen_entry[1], chosen_entry[0]
+        chosen_dict, dict_name = chosen_entry[1], chosen_entry[0]
+
+        while not chosen_dict:
+            available_dicts.remove(chosen_entry)
+            if not available_dicts:
+                print("No non-empty dictionaries available")
+                return None, None
+
+            chosen_entry = random.choice(available_dicts)
+            chosen_dict, dict_name = chosen_entry[1], chosen_entry[0]
+
+        setattr(self, f"last_chosen_{dict_name}", dict_name)
+        return chosen_dict, dict_name
         # debug -------------------------
         # dict = self.pick_dict
         #
@@ -85,11 +109,31 @@ class LearningSession(tk.Toplevel):
         if not self.chosen_dict:
             return None, None
 
-        random_key = random.choice(list(self.chosen_dict.keys()))
+        available_keys = list(set(self.chosen_dict.keys()) - set(self.previous_keys))
+
+        if not available_keys:
+            if len(self.previous_keys) == len(self.chosen_dict):
+                return self.previous_keys[0], self.chosen_dict[self.previous_keys[0]]
+
+            self.force_close(self.wrong_answers, len(self.previous_keys))
+            return self.previous_keys[0], self.chosen_dict[self.previous_keys[0]]
+
+        random_key = random.choice(available_keys)
         random_value = self.chosen_dict[random_key]
+
+        self.previous_keys.append(random_key)
+        print("pk: ", self.previous_keys)
+
         return random_key, random_value
+    # def get_random_key_value(self):
+    #     # if len(self.previous_keys) == self.session_len:
+    #     #     return self.previous_keys[0], self.chosen_dict[self.previous_keys[0]]
+    #
+    #     while len(self.previous_keys) != self.session_len:
+    #         available_keys = list(set(self.chosen_dict.keys())
 
     def get_different_values(self, current_value, dict_to_choose_from, number_of_values=3):
+        """Fetches values from other dictionaries to use them as wrong values in games"""
         values_list = list(dict_to_choose_from.values())
         different_values = []
 
@@ -133,8 +177,17 @@ class LearningSession(tk.Toplevel):
 
         self.show_frame(self.dict_name)
 
+    def wrong_answer(self, key, value):
+        self.wrong_answers[key] = value
+        print("---------------", self.wrong_answers)
 
-# todo elementy UI klas tk.Frame
+    def force_close(self, wrong_answers, dict_len):
+        self.close()
+        open_session_report(wrong_answers, dict_len)
+
+    def close(self):
+        self.destroy()
+
 
 class Flashcard(tk.Frame):
     def __init__(self, parent, key, value):
@@ -165,11 +218,12 @@ class Flashcard(tk.Frame):
         self.flip_button = tk.Button(self, image=self.flip_button_bg, command=self.flip_card, bd=0, bg="#9ED2BE")
         self.flip_button.place(x=248, y=398)
 
-        self.unknown_button = tk.Button(self, image=self.no_button_bg, command=lambda: self.check_answer(0),
+        self.unknown_button = tk.Button(self, image=self.no_button_bg, command=self.incorrect,
                                         bd=0, bg="#9ED2BE")
         self.unknown_button.place(x=82, y=488)
 
-        self.known_button = tk.Button(self, image=self.yes_button_bg, command=lambda: self.check_answer(1), bd=0, bg="#9ED2BE")
+        self.known_button = tk.Button(self, image=self.yes_button_bg, command=self.correct, bd=0,
+                                      bg="#9ED2BE")
         self.known_button.place(x=448, y=488)
 
         self.unknown = {}
@@ -187,13 +241,12 @@ class Flashcard(tk.Frame):
                 self.canvas.itemconfig(self.canvas_bg, image=self.flashcard_front_bg)
                 self.canvas.itemconfig(self.card_word, text=self.key, fill="white")
 
-    def check_answer(self, answer):
-        # todo pass value to pointing system
-        if answer == 1:
-            print("yay 1 point")
-        else:
-            print("0 points :/")
+    def correct(self):
+        print("yay 1 point")
+        self.master.open_next_frame()
 
+    def incorrect(self):
+        self.master.wrong_answer(self.key, self.value)
         self.master.open_next_frame()
 
 
@@ -243,17 +296,17 @@ class MatchExpression(tk.Frame):
         random_number = random.randint(0, 2)
 
         if random_number == 0:
-            self.answer_a.configure(text=self.key, command=lambda: self.pick_answer(1))
-            self.answer_b.configure(text=self.wrong_answers[0], command=lambda: self.pick_answer(0))
-            self.answer_c.configure(text=self.wrong_answers[1], command=lambda: self.pick_answer(0))
+            self.answer_a.configure(text=self.key, command=self.correct)
+            self.answer_b.configure(text=self.wrong_answers[0], command=self.incorrect)
+            self.answer_c.configure(text=self.wrong_answers[1], command=self.incorrect)
         elif random_number == 1:
-            self.answer_b.configure(text=self.key, command=lambda: self.pick_answer(1))
-            self.answer_a.configure(text=self.wrong_answers[0], command=lambda: self.pick_answer(0))
-            self.answer_c.configure(text=self.wrong_answers[1], command=lambda: self.pick_answer(0))
+            self.answer_b.configure(text=self.key, command=self.correct)
+            self.answer_a.configure(text=self.wrong_answers[0], command=self.incorrect)
+            self.answer_c.configure(text=self.wrong_answers[1], command=self.incorrect)
         elif random_number == 2:
-            self.answer_c.configure(text=self.key, command=lambda: self.pick_answer(1))
-            self.answer_a.configure(text=self.wrong_answers[0], command=lambda: self.pick_answer(0))
-            self.answer_b.configure(text=self.wrong_answers[1], command=lambda: self.pick_answer(0))
+            self.answer_c.configure(text=self.key, command=self.correct)
+            self.answer_a.configure(text=self.wrong_answers[0], command=self.incorrect)
+            self.answer_b.configure(text=self.wrong_answers[1], command=self.incorrect)
 
         self.center_text_horizontally()
 
@@ -265,12 +318,13 @@ class MatchExpression(tk.Frame):
 
         self.word_to_display.place(x=word_x_offset, y=178, anchor=tk.W)
 
-    def pick_answer(self, answer):
-        # todo pass value to pointing system
-        if answer:
-            print("yay 1 point")
-        else:
-            print("0 points")
+    def correct(self):
+        print("yay 1 point")
+        self.master.open_next_frame()
+
+    def incorrect(self):
+        self.master.wrong_answer(self.key, self.value)
+        self.master.open_next_frame()
 
 
 class MatchTranslation(tk.Frame):
@@ -320,33 +374,32 @@ class MatchTranslation(tk.Frame):
         random_number = random.randint(0, 3)
 
         if random_number == 0:
-            self.answer_a.configure(text=self.key, command=lambda: self.pick_answer(1))
-            self.answer_b.configure(text=self.wrong_answers[0], command=lambda: self.pick_answer(0))
-            self.answer_c.configure(text=self.wrong_answers[1], command=lambda: self.pick_answer(0))
-            self.answer_d.configure(text=self.wrong_answers[2], command=lambda: self.pick_answer(0))
+            self.answer_a.configure(text=self.key, command=self.correct)
+            self.answer_b.configure(text=self.wrong_answers[0], command=self.incorrect)
+            self.answer_c.configure(text=self.wrong_answers[1], command=self.incorrect)
+            self.answer_d.configure(text=self.wrong_answers[2], command=self.incorrect)
         elif random_number == 1:
-            self.answer_b.configure(text=self.key, command=lambda: self.pick_answer(1))
-            self.answer_a.configure(text=self.wrong_answers[0], command=lambda: self.pick_answer(0))
-            self.answer_c.configure(text=self.wrong_answers[1], command=lambda: self.pick_answer(0))
-            self.answer_d.configure(text=self.wrong_answers[2], command=lambda: self.pick_answer(0))
+            self.answer_b.configure(text=self.key, command=self.correct)
+            self.answer_a.configure(text=self.wrong_answers[0], command=self.incorrect)
+            self.answer_c.configure(text=self.wrong_answers[1], command=self.incorrect)
+            self.answer_d.configure(text=self.wrong_answers[2], command=self.incorrect)
         elif random_number == 2:
-            self.answer_c.configure(text=self.key, command=lambda: self.pick_answer(1))
-            self.answer_a.configure(text=self.wrong_answers[0], command=lambda: self.pick_answer(0))
-            self.answer_b.configure(text=self.wrong_answers[1], command=lambda: self.pick_answer(0))
-            self.answer_d.configure(text=self.wrong_answers[2], command=lambda: self.pick_answer(0))
+            self.answer_c.configure(text=self.key, command=self.correct)
+            self.answer_a.configure(text=self.wrong_answers[0], command=self.incorrect)
+            self.answer_b.configure(text=self.wrong_answers[1], command=self.incorrect)
+            self.answer_d.configure(text=self.wrong_answers[2], command=self.incorrect)
         elif random_number == 3:
-            self.answer_d.configure(text=self.key, command=lambda: self.pick_answer(1))
-            self.answer_a.configure(text=self.wrong_answers[0], command=lambda: self.pick_answer(0))
-            self.answer_b.configure(text=self.wrong_answers[1], command=lambda: self.pick_answer(0))
-            self.answer_c.configure(text=self.wrong_answers[2], command=lambda: self.pick_answer(0))
+            self.answer_d.configure(text=self.key, command=self.correct)
+            self.answer_a.configure(text=self.wrong_answers[0], command=self.incorrect)
+            self.answer_b.configure(text=self.wrong_answers[1], command=self.incorrect)
+            self.answer_c.configure(text=self.wrong_answers[2], command=self.incorrect)
 
-    def pick_answer(self, answer):
-        # todo pass value to pointing system
-        if answer == 1:
-            print("yay 1 point")
-        else:
-            print("0 points :/")
+    def correct(self):
+        print("yay 1 point")
+        self.master.open_next_frame()
 
+    def incorrect(self):
+        self.master.wrong_answer(self.key, self.value)
         self.master.open_next_frame()
 
 
@@ -430,20 +483,19 @@ class TrueFalse(tk.Frame):
         random_number = random.randint(0, 1)
         if random_number == 0:
             self.value_to_display.configure(text=self.value)
-            self.false_button.configure(command=lambda: self.pick_answer(0))
-            self.true_button.configure(command=lambda: self.pick_answer(1))
+            self.false_button.configure(command=self.incorrect)
+            self.true_button.configure(command=self.correct)
         else:
             self.value_to_display.configure(text=self.wrong_answers[0])
-            self.false_button.configure(command=lambda: self.pick_answer(1))
-            self.true_button.configure(command=lambda: self.pick_answer(0))
+            self.false_button.configure(command=self.correct)
+            self.true_button.configure(command=self.incorrect)
 
-    def pick_answer(self, answer):
-        # todo pass value to pointing system
-        if answer == 1:
-            print("yay 1 point")
-        else:
-            print("0 points :/")
+    def correct(self):
+        print("yay 1 point")
+        self.master.open_next_frame()
 
+    def incorrect(self):
+        self.master.wrong_answer(self.key, self.value)
         self.master.open_next_frame()
 
 
@@ -512,19 +564,18 @@ class PickCorrect(tk.Frame):
         random_number = random.randint(0, 1)
 
         if random_number == 0:
-            self.first_option.configure(text=self.value, command=lambda: self.pick_answer(1))
-            self.second_option.configure(text=self.wrong_answers[0], command=lambda: self.pick_answer(0))
+            self.first_option.configure(text=self.value, command=self.correct)
+            self.second_option.configure(text=self.wrong_answers[0], command=self.incorrect)
         elif random_number == 1:
-            self.second_option.configure(text=self.value, command=lambda: self.pick_answer(1))
-            self.first_option.configure(text=self.wrong_answers[0], command=lambda: self.pick_answer(0))
+            self.second_option.configure(text=self.value, command=self.correct)
+            self.first_option.configure(text=self.wrong_answers[0], command=self.incorrect)
 
-    def pick_answer(self, answer):
-        # todo pass value to pointing system
-        if answer == 1:
-            print("yay 1 point")
-        else:
-            print("0 points :/")
+    def correct(self):
+        print("yay 1 point")
+        self.master.open_next_frame()
 
+    def incorrect(self):
+        self.master.wrong_answer(self.key, self.value)
         self.master.open_next_frame()
 
 
@@ -641,6 +692,7 @@ class Hangman(tk.Frame):
             self.is_game_over = True
             self.master.open_next_frame()
         elif self.lives == 0:
+            self.master.wrong_answer(self.key, self.value)
             messagebox.showinfo("Wrong", "Unfortunately you didn't guess the word")
             self.is_game_over = True
             # todo pass information to pointing system

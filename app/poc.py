@@ -1,28 +1,51 @@
 
 
+dict = {}
+tab = []
+
+for i in range(15):
+    dict[i] = i+6
+    tab.append(i)
 
 
+print("size of dict: ", len(dict))
+print("size of tab: ", len(tab))
+print(dict)
 
+yy = {
+  "apple": "jablko",
+  "orange": "pomarancza",
+  "car": "samochod",
+  "tree": "drzewo",
+  "river": "rzeka",
+  "mountain": "gora",
+  "book": "ksiazka",
+  "computer": "komputer",
+  "sun": "slonce",
+  "moon": "ksiezyc",
+  "flower": "kwiat",
+  "bird": "ptak",
+  "fish": "ryba",
+  "cloud": "chmura",
+  "rain": "deszcz",
+  "fire": "ogien",
+  "earth": "ziemia",
+  "wind": "wiatr",
+  "coffee": "kawa",
+  "music": "muzyka",
+  "happy": "szczesliwy",
+  "sad": "smutny",
+  "friend": "przyjaciel",
+  "love": "milosc",
+  "time": "czas",
+  "space": "przestrzen",
+  "color": "kolor",
+  "dream": "marzenie",
+  "journey": "podroz",
+  "word": "slowo",
+  "dog": "pies",
+  "cat": "kot",
+  "long_sentence": "To jest zdanie majace 30 znakow."
+}
 
-
-def funkcja():
-    # Ścieżka do pliku CSV
-    file_path = "./data/temporary_data/check_language.csv"
-
-    try:
-        with open(file_path, mode='r', newline='') as file:
-            csv_reader = csv.reader(file)
-            first_row = next(csv_reader)  # Odczytaj pierwszą linię
-
-            # Wyświetl pierwszą linię
-            print(first_row)
-
-    except FileNotFoundError:
-        print(f"Plik '{file_path}' nie został znaleziony.")
-    except Exception as e:
-        print(f"Wystąpił błąd: {str(e)}")
-    return first_row[0]
-#
-#
-# x = funkcja()
-# print(x)
+print(len(yy))
