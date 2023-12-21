@@ -3,15 +3,15 @@ from tkinter import PhotoImage
 import math
 import json
 from app.components.pomodoro_settings import PomodoroSettings
-from functions.safe_session import save_data
-from functions.get_file_path import get_file_path
-from functions.get_data_from_json_file import fetch_json_data
-from functions.get_data_from_csv_file import fetch_csv_data
+from app.functions.safe_session import save_data
+from app.functions.get_file_path import get_file_path
+from app.functions.get_data_from_json_file import fetch_json_data
+from app.functions.get_data_from_csv_file import fetch_csv_data
 from tkinter import messagebox
 import os
-from functions.check_session_number import list_files_in_directory
-from functions.get_session_date import get_file_creation_time
-from functions.delete_session import delete_session
+from app.functions.check_session_number import list_files_in_directory
+from app.functions.get_session_date import get_file_creation_time
+from app.functions.delete_session import delete_session
 from app.functions.open_word_flashcard import open_word_flashcard
 from app.functions.open_saved_session import open_learning_session
 
