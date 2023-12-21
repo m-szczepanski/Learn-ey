@@ -14,8 +14,20 @@ class LearningSession(tk.Toplevel):
         self.resizable(False, False)
         self.wm_attributes("-topmost", True)
 
+        self.frames = {}
+
         (self.flashcard_dict, self.match_expression_dict, self.match_translation_dict, self.tf_dict, self.pick_dict,
          self.hangman_dict) = distribute_data_json(self.learning_session)
+
+        self.dict_choices = [
+            ("flashcard", self.flashcard_dict),
+            ("match_expression", self.match_expression_dict),
+            ("match_translation", self.match_translation_dict),
+            ("tf", self.tf_dict),
+            ("pick", self.pick_dict),
+            ("hangman", self.hangman_dict),
+        ]
+
         # debug
         print("flashcard: ", self.flashcard_dict)
         print("match_expression: ", self.match_expression_dict)
@@ -24,16 +36,12 @@ class LearningSession(tk.Toplevel):
         print("pick: ", self.pick_dict)
         print("hangman: ", self.hangman_dict)
 
-        self.available_dicts = []
         self.session_len = 0
-        self.update_available_dicts()
-
         for dictionary in (self.flashcard_dict, self.match_expression_dict, self.match_translation_dict, self.tf_dict,
                            self.pick_dict, self.hangman_dict):
             self.session_len += len(dictionary)
 
         print("len of session: ", self.session_len)
-        print("available dicts: ", self.available_dicts)
 
         self.chosen_dict, self.dict_name = self.random_dict()
 
@@ -42,59 +50,7 @@ class LearningSession(tk.Toplevel):
         self.previous_keys = []
         self.wrong_answers = {}
 
-        key, value = self.get_random_key_value()
-        wrong_answers = self.get_different_values(value, self.chosen_dict, 3)
-
-        self.frames = {}
-        #self.forget_empty_dict_frames()
-
-
-        self.frames["flashcard"] = Flashcard(self, key, value)
-        self.frames["match_expression"] = MatchExpression(self, key, value, wrong_answers)
-        self.frames["match_translation"] = MatchTranslation(self, key, value, wrong_answers)
-        self.frames["tf"] = TrueFalse(self, key, value, wrong_answers)
-        self.frames["pick"] = PickCorrect(self, key, value, wrong_answers)
-        self.frames["hangman"] = Hangman(self, key, value)
-
-        #self.forget_empty_dict_frames()
-        print('available frames: ', self.frames)
-
-        self.show_frame(self.dict_name)
-
-    def update_available_dicts(self):
-        dicts_to_check = [
-            self.flashcard_dict,
-            self.match_expression_dict,
-            self.match_translation_dict,
-            self.tf_dict,
-            self.pick_dict,
-            self.hangman_dict
-        ]
-
-        self.available_dicts = [dct for dct in dicts_to_check if dct and len(dct) > 0]
-
-        if not self.available_dicts:
-            self.force_close(self.wrong_answers, len(self.previous_keys))
-
-    # def forget_empty_dict_frames(self):
-    #     frames_to_forget = []
-    #     for frame_name, dictionary in zip(
-    #             ["flashcard", "match_expression", "match_translation", "tf", "pick", "hangman"],
-    #             [
-    #                 self.flashcard_dict,
-    #                 self.match_expression_dict,
-    #                 self.match_translation_dict,
-    #                 self.tf_dict,
-    #                 self.pick_dict,
-    #                 self.hangman_dict
-    #             ]
-    #     ):
-    #         if not dictionary and frame_name in self.frames:
-    #             frames_to_forget.append(frame_name)
-    #
-    #     for frame_name in frames_to_forget:
-    #         self.frames[frame_name].forget()
-    #         del self.frames[frame_name]
+        self.open_next_frame()
 
     def show_frame(self, frame_name):
         if frame := self.frames.get(frame_name):
@@ -105,13 +61,10 @@ class LearningSession(tk.Toplevel):
                     other_frame.forget()
 
     def random_dict(self, consecutive_limit=3):
-        available_dicts = [(name, dictionary) for name, dictionary in zip(
-            ["flashcard", "match_expression", "match_translation", "tf", "pick", "hangman"],
-            self.available_dicts
-        ) if len(dictionary) > 0]
+        available_dicts = [(name, dictionary) for name, dictionary in self.dict_choices if len(dictionary) > 0]
 
         if not available_dicts:
-            self.force_close(self.wrong_answers, len(self.previous_keys))
+            return None, None
 
         chosen_entry = None
         for _ in range(consecutive_limit):
@@ -134,32 +87,25 @@ class LearningSession(tk.Toplevel):
 
         setattr(self, f"last_chosen_{dict_name}", dict_name)
         return chosen_dict, dict_name
-        # debug -------------------------
-        # dict = self.pick_dict
-        #
-        # if len(dict) > 0:
-        #     return self.pick_dict, "pick"
-        # else:
-        #     return None, None
 
     def get_random_key_value(self):
-        available_keys = list(self.chosen_dict.keys())
+        if not self.chosen_dict:
+            return None, None
+
+        available_keys = list(set(self.chosen_dict.keys()) - set(self.previous_keys))
 
         if not available_keys:
-            self.force_close(self.wrong_answers, self.session_len)
+            if len(self.previous_keys) == len(self.chosen_dict):
+                return self.previous_keys[0], self.chosen_dict[self.previous_keys[0]]
 
-        available_keys = list(set(available_keys) - set(self.previous_keys))
-        print("AK: ", available_keys)
-
-        if not available_keys:
-            self.force_close(self.wrong_answers, self.session_len)
+            self.force_close(self.wrong_answers, len(self.previous_keys))
+            return self.previous_keys[0], self.chosen_dict[self.previous_keys[0]]
 
         random_key = random.choice(available_keys)
         random_value = self.chosen_dict[random_key]
 
         self.previous_keys.append(random_key)
         print("pk: ", self.previous_keys)
-        print("pk len: ", len(self.previous_keys))
 
         return random_key, random_value
 
@@ -200,6 +146,7 @@ class LearningSession(tk.Toplevel):
         print("dict name: ", self.dict_name)
 
         key, value = self.get_random_key_value()
+
         wrong_answers = self.get_different_values(value, self.chosen_dict, 3)
 
         self.frames["flashcard"] = Flashcard(self, key, value)
@@ -213,6 +160,7 @@ class LearningSession(tk.Toplevel):
 
     def wrong_answer(self, key, value):
         self.wrong_answers[key] = value
+        print("---------------", self.wrong_answers)
 
     def force_close(self, wrong_answers, dict_len):
         self.close()
@@ -292,7 +240,7 @@ class MatchExpression(tk.Frame):
         self.configure(width=681, height=686)
 
         self.background_image = PhotoImage(file="./components/graphical_components/games/match_expression/"
-                                                "match_expression_bg.png")
+                                           "match_expression_bg.png")
         self.label_bg = PhotoImage(file="./components/graphical_components/games/pick_correct/label_bg.png")
 
         self.background = tk.Label(self, image=self.background_image)
@@ -302,7 +250,7 @@ class MatchExpression(tk.Frame):
         self.canvas_bg = self.canvas.create_image(0, 0, anchor=tk.NW, image=self.label_bg)
         self.canvas.place(x=33, y=64)
 
-        # print("wrong answers: ", self.wrong_answers)
+        print("wrong answers: ", self.wrong_answers)
 
         self.word_to_display = tk.Label(
             self.canvas,
@@ -329,15 +277,15 @@ class MatchExpression(tk.Frame):
         random_number = random.randint(0, 2)
 
         if random_number == 0:
-            self.answer_a.configure(text=self.key, command=self.correct)
+            self.answer_a.configure(text=self.value, command=self.correct)
             self.answer_b.configure(text=self.wrong_answers[0], command=self.incorrect)
             self.answer_c.configure(text=self.wrong_answers[1], command=self.incorrect)
         elif random_number == 1:
-            self.answer_b.configure(text=self.key, command=self.correct)
+            self.answer_b.configure(text=self.value, command=self.correct)
             self.answer_a.configure(text=self.wrong_answers[0], command=self.incorrect)
             self.answer_c.configure(text=self.wrong_answers[1], command=self.incorrect)
         elif random_number == 2:
-            self.answer_c.configure(text=self.key, command=self.correct)
+            self.answer_c.configure(text=self.value, command=self.correct)
             self.answer_a.configure(text=self.wrong_answers[0], command=self.incorrect)
             self.answer_b.configure(text=self.wrong_answers[1], command=self.incorrect)
 
@@ -345,7 +293,6 @@ class MatchExpression(tk.Frame):
 
     def center_text_horizontally(self):
         canvas_width = 616
-
         word_to_display = self.word_to_display.winfo_reqwidth()
         word_x_offset = (canvas_width - word_to_display) / 2
 
@@ -407,22 +354,22 @@ class MatchTranslation(tk.Frame):
         random_number = random.randint(0, 3)
 
         if random_number == 0:
-            self.answer_a.configure(text=self.key, command=self.correct)
+            self.answer_a.configure(text=self.value, command=self.correct)
             self.answer_b.configure(text=self.wrong_answers[0], command=self.incorrect)
             self.answer_c.configure(text=self.wrong_answers[1], command=self.incorrect)
             self.answer_d.configure(text=self.wrong_answers[2], command=self.incorrect)
         elif random_number == 1:
-            self.answer_b.configure(text=self.key, command=self.correct)
+            self.answer_b.configure(text=self.value, command=self.correct)
             self.answer_a.configure(text=self.wrong_answers[0], command=self.incorrect)
             self.answer_c.configure(text=self.wrong_answers[1], command=self.incorrect)
             self.answer_d.configure(text=self.wrong_answers[2], command=self.incorrect)
         elif random_number == 2:
-            self.answer_c.configure(text=self.key, command=self.correct)
+            self.answer_c.configure(text=self.value, command=self.correct)
             self.answer_a.configure(text=self.wrong_answers[0], command=self.incorrect)
             self.answer_b.configure(text=self.wrong_answers[1], command=self.incorrect)
             self.answer_d.configure(text=self.wrong_answers[2], command=self.incorrect)
         elif random_number == 3:
-            self.answer_d.configure(text=self.key, command=self.correct)
+            self.answer_d.configure(text=self.value, command=self.correct)
             self.answer_a.configure(text=self.wrong_answers[0], command=self.incorrect)
             self.answer_b.configure(text=self.wrong_answers[1], command=self.incorrect)
             self.answer_c.configure(text=self.wrong_answers[2], command=self.incorrect)
@@ -693,7 +640,7 @@ class Hangman(tk.Frame):
             for _ in range(button_counts[i]):
                 button = tk.Button(self, bd=0, bg="#C8E4B3", font=('Inter', 12, 'bold'), fg="#FFFFFF",
                                    text=letters[button_index], command=lambda char=letters[button_index].lower():
-                    self.button_press(char))
+                                   self.button_press(char))
                 button.place(x=buttons_x[button_index], y=y_pos[i])
 
                 if button_index < len(letters):
@@ -726,7 +673,6 @@ class Hangman(tk.Frame):
             self.master.open_next_frame()
         elif self.lives == 0:
             self.master.wrong_answer(self.key, self.value)
-            #messagebox.showinfo("Wrong", "Unfortunately you didn't guess the word")
             self.is_game_over = True
             # todo pass information to pointing system
             self.master.open_next_frame()
