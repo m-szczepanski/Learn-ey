@@ -674,7 +674,6 @@ class Hangman(tk.Frame):
         elif self.lives == 0:
             self.master.wrong_answer(self.key, self.value)
             self.is_game_over = True
-            # todo pass information to pointing system
             self.master.open_next_frame()
 
     def switch(self, lives):
