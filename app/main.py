@@ -343,7 +343,11 @@ class RightFrame(tk.Frame):
         self.main_panel_button_enabled = value
 
     def open_about(self):
-        print('About button has been pressed')
+        file_path = '../docs/Projekt.docx'
+        if os.path.exists(file_path):
+            os.system(f'start {file_path}')
+        else:
+            print("File does not exist!")
 
     def quit_app(self):
         self.master.destroy()
