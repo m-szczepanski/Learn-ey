@@ -2,13 +2,15 @@ import tkinter as tk
 from tkinter import PhotoImage
 import math
 import json
+import os
+import pygame
+
 from app.components.pomodoro_settings import PomodoroSettings
 from app.functions.safe_session import save_data
 from app.functions.get_file_path import get_file_path
 from app.functions.get_data_from_json_file import fetch_json_data
 from app.functions.get_data_from_csv_file import fetch_csv_data
 from tkinter import messagebox
-import os
 from app.functions.check_session_number import list_files_in_directory
 from app.functions.get_session_date import get_file_creation_time
 from app.functions.delete_session import delete_session
@@ -196,6 +198,8 @@ class RightFrame(tk.Frame):
         # Pomodoro section
         self.get_settings()
 
+        pygame.mixer.init()
+
         self.timer = tk.Label(self, text="--:--", font=('Courier', 28, "normal"), fg="#FFD9B7", background="#dd2e44",
                               bd=0)
         self.timer.place(x=80, y=138)
@@ -279,6 +283,28 @@ class RightFrame(tk.Frame):
         repetitions = 0
         num_of_ticks = ""
 
+    def play_sound(self, sound):
+        pygame.mixer.init()
+        pygame.mixer.music.set_volume(0.5)
+
+        path = {
+            1: "components/audio/a_chord.wav",
+            2: "components/audio/c_chord.wav",
+            3: "components/audio/e_chord.wav"
+        }
+
+        # Sprawdzenie wartości sound i wywołanie odpowiedniego path w switch case
+        if sound == 1:
+            pygame.mixer.music.load(path[1])
+        elif sound == 2:
+            pygame.mixer.music.load(path[2])
+        elif sound == 3:
+            pygame.mixer.music.load(path[3])
+        else:
+            raise ValueError("Nieprawidłowy numer dźwięku")
+
+        pygame.mixer.music.play(loops=0)  # Odtwarzanie dźwięku
+
     def open_settings(self):
         root = tk.Toplevel()
         settings_app = PomodoroSettings(root)
@@ -296,12 +322,15 @@ class RightFrame(tk.Frame):
         work_min, short_break_min, long_break_min = self.get_settings()
         repetitions += 1
         if repetitions % 8 == 0:
+            self.play_sound(1)
             self.count_down(int(long_break_min) * 60)
             self.status_label.config(image=self.timer_state_long_break_bg)
         elif repetitions % 2 == 0:
+            self.play_sound(2)
             self.count_down(int(short_break_min) * 60)
             self.status_label.config(image=self.timer_state_quick_break_bg)
         else:
+            self.play_sound(3)
             self.count_down(int(work_min) * 60)
             self.status_label.config(image=self.timer_state_learning_time_bg)
 
@@ -314,7 +343,11 @@ class RightFrame(tk.Frame):
         self.main_panel_button_enabled = value
 
     def open_about(self):
-        print('About button has been pressed')
+        file_path = '../docs/Projekt.docx'
+        if os.path.exists(file_path):
+            os.system(f'start {file_path}')
+        else:
+            print("File does not exist!")
 
     def quit_app(self):
         self.master.destroy()
