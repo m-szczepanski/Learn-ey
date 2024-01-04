@@ -41,7 +41,7 @@ class MainPanel(tk.Tk):
         self.frames["right_frame"] = RightFrame(self)
         self.frames["word_frame"] = WordFrame(self)
         self.frames["expression_frame"] = ExpressionSection(self)
-        self.frames["full_word_list"] = FullWordList(self)
+        self.frames["full_language_list"] = FullLanguageList(self)
 
         self.open_initial_frames()
         self.frames["right_frame"].set_main_panel_button_visibility(False)
@@ -111,7 +111,7 @@ class LeftFrame(tk.Frame):
 
         # bottom panel
         self.full_list_bg = PhotoImage(file="components/graphical_components/main_panel/full_list_button.png")
-        self.full_list = tk.Button(self, image=self.full_list_bg, command=lambda: master.show_frame("full_word_list"),
+        self.full_list = tk.Button(self, image=self.full_list_bg, command=lambda: master.show_frame("full_language_list"),
                                    bd=0, bg="#9ed2be", width=188, height=62)
         self.full_list.place(x=468, y=569)
 
@@ -678,7 +678,7 @@ class ExpressionSection(tk.Frame):
             self.definition_entry.delete(0, 'end')
 
 
-class FullWordList(tk.Frame):
+class FullLanguageList(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
         self.master = master
