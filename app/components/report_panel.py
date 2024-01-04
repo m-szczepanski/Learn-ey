@@ -29,6 +29,18 @@ class ReportPanel(tk.Toplevel):
         self.display_wrong_answers()
 
     def create_pie_chart(self, wrong_answers, session_len):
+        """Create a pie chart.
+
+            This method creates a pie chart to visualize the percentage of correct answers in the learning session.
+
+            Args:
+                self: The instance of the class.
+                wrong_answers (list): A list of wrong answers.
+                session_len (int): The length of the learning session.
+
+            Returns:
+                None.
+            """
         correct_answers = session_len - len(wrong_answers)
         correct_percent = round((correct_answers / session_len) * 100)
 
@@ -51,18 +63,26 @@ class ReportPanel(tk.Toplevel):
         canvas_widget.place(x=90, y=76)
 
     def display_wrong_answers(self):
-        panel_width = 360  # Szerokość panelu
-        x_positions = []  # Lista przechowująca pozycje x dla etykiet
+        """Display wrong answers.
+
+            This method displays the wrong answers on the report panel.
+
+            Args:
+                self: The instance of the class.
+
+            Returns:
+                None.
+            """
+        panel_width = 360
+        x_positions = []
         y_positions = [458, 505, 552, 599]
 
         for i, (answer, result) in enumerate(self.wrong.items()):
             if i >= 4:
-                break  # Wyświetlamy maksymalnie 4 odpowiedzi
-
+                break
             combined_text = f'{answer} - {result}'
-            if len(combined_text) <= 26:  # Sprawdzenie długości łącznego tekstu
-                # Oblicz wartość x na podstawie szerokości tekstu
-                text_width = len(combined_text) * 12  # Przyjęta szerokość pojedynczego znaku (przykładowa wartość)
+            if len(combined_text) <= 26:
+                text_width = len(combined_text) * 12
                 x_position = (panel_width - text_width) / 2
                 x_positions.append(x_position)
 

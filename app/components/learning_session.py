@@ -53,6 +53,13 @@ class LearningSession(tk.Toplevel):
         self.open_next_frame()
 
     def show_frame(self, frame_name):
+        """Show a frame.
+
+            This method shows the specified frame and hides all other frames.
+
+            Args:
+                frame_name (str): The name of the frame to show.
+            """
         if frame := self.frames.get(frame_name):
             frame.tkraise()
 
@@ -61,6 +68,20 @@ class LearningSession(tk.Toplevel):
                     other_frame.forget()
 
     def random_dict(self, consecutive_limit=3):
+        """Get a random dictionary.
+
+           This method returns a random dictionary from the available dictionaries, with a limit on consecutive selections.
+
+           Args:
+               self: The instance of the class.
+               consecutive_limit (int): The limit on consecutive selections.
+
+           Returns:
+               tuple: A tuple containing the chosen dictionary and its name.
+
+           Raises:
+               None.
+           """
         available_dicts = [(name, dictionary) for name, dictionary in self.dict_choices if len(dictionary) > 0]
 
         if not available_dicts:
@@ -89,6 +110,20 @@ class LearningSession(tk.Toplevel):
         return chosen_dict, dict_name
 
     def get_random_key_value(self):
+        """Get a random key-value pair.
+
+           This method returns a random key-value pair from the chosen dictionary, with a limit on consecutive
+           selections.
+
+           Args:
+               self: The instance of the class.
+
+           Returns:
+               tuple: A tuple containing the random key and value.
+
+           Raises:
+               None.
+           """
         if not self.chosen_dict:
             return None, None
 
@@ -110,6 +145,22 @@ class LearningSession(tk.Toplevel):
         return random_key, random_value
 
     def get_different_values(self, current_value, dict_to_choose_from, number_of_values=3):
+        """Get different values.
+
+            This method returns a list of different values from the specified dictionary, excluding the current value.
+
+            Args:
+                self: The instance of the class.
+                current_value: The current value to exclude.
+                dict_to_choose_from: The dictionary to choose values from.
+                number_of_values (int): The number of different values to return.
+
+            Returns:
+                list: A list of different values.
+
+            Raises:
+                None.
+            """
         values_list = list(dict_to_choose_from.values())
         different_values = []
 
@@ -139,6 +190,16 @@ class LearningSession(tk.Toplevel):
         return different_values
 
     def open_next_frame(self):
+        """Open the next frame.
+
+            This method opens the next frame based on the current frame and the chosen dictionary.
+
+            Args:
+                self: The instance of the class.
+
+            Returns:
+                None.
+            """
         if current_frame := self.frames.get(self.dict_name):
             current_frame.forget()
 
@@ -159,10 +220,31 @@ class LearningSession(tk.Toplevel):
         self.show_frame(self.dict_name)
 
     def wrong_answer(self, key, value):
+        """Record a wrong answer.
+
+            This method records a wrong answer by adding it to the `wrong_answers` dictionary.
+
+            Args:
+                self: The instance of the class.
+                key: The key of the wrong answer.
+                value: The value of the wrong answer.
+            """
         self.wrong_answers[key] = value
-        print("---------------", self.wrong_answers)
+        # print("---------------", self.wrong_answers)
 
     def force_close(self, wrong_answers, dict_len):
+        """Force close the learning session.
+
+            This method forces the learning session to close and opens the session report.
+
+            Args:
+                self: The instance of the class.
+                wrong_answers (dict): A dictionary of wrong answers.
+                dict_len (int): The length of the dictionary.
+
+            Returns:
+                None.
+            """
         self.close()
         open_session_report(wrong_answers, dict_len)
 
@@ -212,6 +294,16 @@ class Flashcard(tk.Frame):
         print(self.key, self.value)
 
     def flip_card(self):
+        """Flip the flashcard.
+
+            This method flips the flashcard from the front side to the back side, or vice versa.
+
+            Args:
+                self: The instance of the class.
+
+            Returns:
+                None.
+            """
         if self.key:
             if self.canvas.itemcget(self.canvas_bg, "image") == str(self.flashcard_front_bg):
                 # If the card is faced upwards, flip to the backside
@@ -223,10 +315,31 @@ class Flashcard(tk.Frame):
                 self.canvas.itemconfig(self.card_word, text=self.key, fill="white")
 
     def correct(self):
+        """Handle a correct answer.
+
+            This method handles a correct answer by printing a message and opening the next frame.
+
+            Args:
+                self: The instance of the class.
+
+            Returns:
+                None.
+            """
         print("yay 1 point")
         self.master.open_next_frame()
 
     def incorrect(self):
+        """Handle an incorrect answer.
+
+            This method handles an incorrect answer by calling the `wrong_answer` method of the master instance and
+            opening the next frame.
+
+            Args:
+                self: The instance of the class.
+
+            Returns:
+                None.
+            """
         self.master.wrong_answer(self.key, self.value)
         self.master.open_next_frame()
 
@@ -274,6 +387,16 @@ class MatchExpression(tk.Frame):
         self.pack()
 
     def place_answers(self):
+        """Place the answers.
+
+            This method places the answers on the screen and configures their text and command properties.
+
+            Args:
+                self: The instance of the class.
+
+            Returns:
+                None.
+            """
         random_number = random.randint(0, 2)
 
         if random_number == 0:
@@ -292,6 +415,16 @@ class MatchExpression(tk.Frame):
         self.center_text_horizontally()
 
     def center_text_horizontally(self):
+        """Center the text horizontally.
+
+            This method centers the text horizontally on the canvas.
+
+            Args:
+                self: The instance of the class.
+
+            Returns:
+                None.
+            """
         canvas_width = 616
         word_to_display = self.word_to_display.winfo_reqwidth()
         word_x_offset = (canvas_width - word_to_display) / 2
@@ -299,10 +432,31 @@ class MatchExpression(tk.Frame):
         self.word_to_display.place(x=word_x_offset, y=178, anchor=tk.W)
 
     def correct(self):
+        """Center the text horizontally.
+
+            This method centers the text horizontally on the canvas.
+
+            Args:
+                self: The instance of the class.
+
+            Returns:
+                None.
+            """
         print("yay 1 point")
         self.master.open_next_frame()
 
     def incorrect(self):
+        """Handle an incorrect answer.
+
+            This method handles an incorrect answer by calling the `wrong_answer` method of the master instance and
+            opening the next frame.
+
+            Args:
+                self: The instance of the class.
+
+            Returns:
+                None.
+            """
         self.master.wrong_answer(self.key, self.value)
         self.master.open_next_frame()
 
@@ -351,6 +505,16 @@ class MatchTranslation(tk.Frame):
         self.pack()
 
     def place_answers(self):
+        """Place the answers.
+
+            This method places the answers on the screen and configures their text and command properties.
+
+            Args:
+                self: The instance of the class.
+
+            Returns:
+                None.
+            """
         random_number = random.randint(0, 3)
 
         if random_number == 0:
@@ -375,10 +539,31 @@ class MatchTranslation(tk.Frame):
             self.answer_c.configure(text=self.wrong_answers[2], command=self.incorrect)
 
     def correct(self):
+        """Handle a correct answer.
+
+            This method handles a correct answer by printing a message and opening the next frame.
+
+            Args:
+                self: The instance of the class.
+
+            Returns:
+                None.
+            """
         print("yay 1 point")
         self.master.open_next_frame()
 
     def incorrect(self):
+        """Handle an incorrect answer.
+
+           This method handles an incorrect answer by calling the `wrong_answer` method of the master instance and
+           opening the next frame.
+
+           Args:
+               self: The instance of the class.
+
+           Returns:
+               None.
+           """
         self.master.wrong_answer(self.key, self.value)
         self.master.open_next_frame()
 
@@ -445,6 +630,16 @@ class TrueFalse(tk.Frame):
         self.pack()
 
     def center_elements_horizontally(self):
+        """Center the elements horizontally.
+
+            This method centers the elements horizontally on the canvas.
+
+            Args:
+                self: The instance of the class.
+
+            Returns:
+                None.
+            """
         canvas_width = 616
 
         key_width = self.key_to_display.winfo_reqwidth()
@@ -460,6 +655,16 @@ class TrueFalse(tk.Frame):
         self.value_to_display.place(x=value_x_offset, y=269, anchor=tk.W)
 
     def create_question(self):
+        """Create a question.
+
+            This method creates a question by configuring the text and command properties of the question elements.
+
+            Args:
+                self: The instance of the class.
+
+            Returns:
+                None.
+            """
         random_number = random.randint(0, 1)
         if random_number == 0:
             self.value_to_display.configure(text=self.value)
@@ -471,10 +676,31 @@ class TrueFalse(tk.Frame):
             self.true_button.configure(command=self.incorrect)
 
     def correct(self):
+        """Handle a correct answer.
+
+            This method handles a correct answer by printing a message and opening the next frame.
+
+            Args:
+                self: The instance of the class.
+
+            Returns:
+                None.
+            """
         print("yay 1 point")
         self.master.open_next_frame()
 
     def incorrect(self):
+        """Handle an incorrect answer.
+
+            This method handles an incorrect answer by calling the `wrong_answer` method of the master instance and
+            opening the next frame.
+
+            Args:
+                self: The instance of the class.
+
+            Returns:
+                None.
+            """
         self.master.wrong_answer(self.key, self.value)
         self.master.open_next_frame()
 
@@ -529,6 +755,16 @@ class PickCorrect(tk.Frame):
         self.pack()
 
     def center_elements_horizontally(self):
+        """Center the elements horizontally.
+
+            This method centers the elements horizontally on the canvas.
+
+            Args:
+                self: The instance of the class.
+
+            Returns:
+                None.
+            """
         canvas_width = 616
 
         title_width = self.game_title.winfo_reqwidth()
@@ -541,6 +777,16 @@ class PickCorrect(tk.Frame):
         self.word_to_display.place(x=key_x_offset, y=178, anchor=tk.W)
 
     def place_answers(self):
+        """Place the answers.
+
+            This method places the answers on the screen and configures their text and command properties.
+
+            Args:
+                self: The instance of the class.
+
+            Returns:
+                None.
+            """
         random_number = random.randint(0, 1)
 
         if random_number == 0:
@@ -551,10 +797,31 @@ class PickCorrect(tk.Frame):
             self.first_option.configure(text=self.wrong_answers[0], command=self.incorrect)
 
     def correct(self):
+        """Handle a correct answer.
+
+            This method handles a correct answer by printing a message and opening the next frame.
+
+            Args:
+                self: The instance of the class.
+
+            Returns:
+                None.
+            """
         print("yay 1 point")
         self.master.open_next_frame()
 
     def incorrect(self):
+        """Handle an incorrect answer.
+
+            This method handles an incorrect answer by calling the `wrong_answer` method of the master instance and
+            opening the next frame.
+
+            Args:
+                self: The instance of the class.
+
+            Returns:
+                None.
+            """
         self.master.wrong_answer(self.key, self.value)
         self.master.open_next_frame()
 
@@ -625,6 +892,16 @@ class Hangman(tk.Frame):
         self.pack()
 
     def create_letter_buttons(self):
+        """Create letter buttons.
+
+            This method creates letter buttons on the screen and configures their properties.
+
+            Args:
+                self: The instance of the class.
+
+            Returns:
+                None.
+            """
         y_pos = [394, 445, 495]
         buttons_x = [103, 151, 202, 250, 300, 350, 398, 451, 495, 546,
                      129, 177, 227, 277, 324, 374, 424, 472, 523,
@@ -648,10 +925,34 @@ class Hangman(tk.Frame):
                     button_index += 1
 
     def button_press(self, char):
+        """Handle a button press.
+
+            This method handles a button press by appending the character to the `user_guesses` list and calling the
+            `check_letter` method.
+
+            Args:
+                self: The instance of the class.
+                char (str): The character pressed.
+
+            Returns:
+                None.
+            """
         self.user_guesses.append(char)
         self.check_letter(char)
 
     def check_letter(self, char):
+        """Check a letter.
+
+            This method checks if a letter is in the key and updates the display accordingly. It also updates the lives
+            and checks if the game is over.
+
+            Args:
+                self: The instance of the class.
+                char (str): The letter to check.
+
+            Returns:
+                None.
+            """
         if char in self.key:
             for i, letter in enumerate(self.key):
                 if letter == char:
@@ -663,10 +964,32 @@ class Hangman(tk.Frame):
         self.check_game_over()
 
     def update_display(self):
+        """Update the display.
+
+            This method updates the display by joining the elements of the `display` list and configuring the text
+            of the `dotted_word` widget.
+
+            Args:
+                self: The instance of the class.
+
+            Returns:
+                None.
+            """
         self.dotted_txt = ' '.join(self.display)
         self.dotted_word.config(text=self.dotted_txt)
 
     def check_game_over(self):
+        """Check if the game is over.
+
+            This method checks if the game is over by checking if all letters have been guessed or if the player
+            has run out of lives.
+
+            Args:
+                self: The instance of the class.
+
+            Returns:
+                None.
+            """
         if "_" not in self.display:
             # todo pass information to pointing system
             self.is_game_over = True
@@ -677,6 +1000,19 @@ class Hangman(tk.Frame):
             self.master.open_next_frame()
 
     def switch(self, lives):
+        """Switch the hangman image.
+
+           This method switches the hangman image based on the number of lives remaining.
+
+           Args:
+               lives (int): The number of lives remaining.
+
+           Returns:
+               None.
+
+           Raises:
+               EOFError: If the image to display is None.
+           """
         hangman_images = {
             6: self.hangman_none,
             5: self.hangman_head,

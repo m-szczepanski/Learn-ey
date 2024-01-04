@@ -33,6 +33,17 @@ class PomodoroSettings:
         self.confirm_button.place(x=135, y=231)
 
     def confirm_settings(self):
+        """Confirm the Pomodoro settings.
+
+            This method confirms the Pomodoro settings by retrieving the values from the entry fields, updating
+            the settings file, and closing the settings window.
+
+            Args:
+                self: The instance of the class.
+
+            Returns:
+                None.
+            """
         work_min = self.work_entry.get()
         short_break_min = self.short_break_entry.get()
         long_break_min = self.long_break_entry.get()
@@ -49,6 +60,17 @@ class PomodoroSettings:
         self.root.destroy()
 
     def set_default_settings(self):
+        """Set the default Pomodoro settings.
+
+            This method sets the default Pomodoro settings by updating the values in the settings file and closing
+            the settings window.
+
+            Args:
+                self: The instance of the class.
+
+            Returns:
+                None.
+            """
         default_values = {
             "WORK_MIN": 25,
             "SHORT_BREAK_MIN": 5,

@@ -2,6 +2,21 @@ import json
 
 
 def distribute_data_json(file_name):
+    """Distribute data from a JSON file into different dictionaries.
+
+       This function distributes the data from a JSON file into different dictionaries based on the length of the key
+       and value.
+
+       Args:
+           file_name (str): The name of the JSON file.
+
+       Returns:
+           tuple: A tuple containing the distributed data dictionaries for flashcards, match expressions, match
+           translations, true/false questions, pick questions, and hangman questions.
+
+       Raises:
+           FileNotFoundError: If the specified file name does not exist.
+       """
     try:
         with open(f"./data/session_data/{file_name}.json", 'r') as json_file:
             data = json.load(json_file)

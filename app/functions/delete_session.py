@@ -2,7 +2,13 @@ import os
 
 
 def delete_session(session_name):
-    """Function deletes specific saved session"""
+    """Delete a session file.
+
+       This function deletes the specified session file.
+
+       Args:
+           session_name (str): The name of the session file to delete.
+       """
     directory_path = "./data/session_data"
     try:
         file_path = os.path.join(directory_path, session_name)

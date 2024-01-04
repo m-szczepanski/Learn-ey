@@ -55,6 +55,18 @@ class WordFlashcard(tk.Toplevel):
         self.next_card()
 
     def next_card(self):
+        """Move to the next flashcard.
+
+            This method moves to the next flashcard by selecting a random card from the dictionary and updating the
+            canvas with the card details. If the dictionary is empty, it closes the learning session and opens the
+            session report.
+
+            Args:
+                self: The instance of the class.
+
+            Returns:
+                None.
+            """
         if self.dict:
             self.current_card = random.choice(list(self.dict.items()))
             self.canvas.itemconfig(self.card_language, text=self.lang_name, fill="#FFD9B7")
@@ -71,6 +83,16 @@ class WordFlashcard(tk.Toplevel):
         print(len(self.dict))
 
     def flip_card(self):
+        """Flip the flashcard.
+
+            This method flips the flashcard from the front side to the back side, or vice versa.
+
+            Args:
+                self: The instance of the class.
+
+            Returns:
+                None.
+            """
         if self.current_card:
             if self.canvas.itemcget(self.canvas_bg, "image") == str(self.flashcard_front_bg):
                 # If the card is faced upwards, flip to the backside
@@ -84,19 +106,62 @@ class WordFlashcard(tk.Toplevel):
                 self.canvas.itemconfig(self.card_language, text=self.lang_name, fill="#FFD9B7")
 
     def is_known(self):
+        """Check if the current flashcard is known.
+
+            This method checks if the current flashcard is known, and if so, removes it from the dictionary and
+            moves to the next flashcard.
+
+            Args:
+                self: The instance of the class.
+
+            Returns:
+                None.
+            """
         if self.current_card:
             del self.dict[self.current_card[0]]
             self.next_card()
 
     def is_unknown(self):
+        """Put current card to unknown list..
+
+           This method adds current flashcard to the `unknown` dictionary and moves to the next flashcard.
+
+           Args:
+               self: The instance of the class.
+
+           Returns:
+               None.
+           """
         if self.current_card:
             self.unknown[self.current_card[0]] = self.current_card[1]  # Dodaj do słownika self.unknown
             del self.dict[self.current_card[0]]  # Usuń z słownika self.dict
             self.next_card()
 
     def close(self):
+        """Close the window.
+
+           This method closes the window.
+
+           Args:
+               self: The instance of the class.
+
+           Returns:
+               None.
+           """
         self.destroy()
 
     def force_close(self, unknown, dict_len):
+        """Force close the window.
+
+            This method forces the window to close and opens the session report.
+
+            Args:
+                self: The instance of the class.
+                unknown (dict): A dictionary containing unknown flashcards.
+                dict_len (int): The length of the flashcard dictionary.
+
+            Returns:
+                None.
+            """
         self.close()
         open_session_report(unknown, dict_len)
