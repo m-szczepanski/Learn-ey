@@ -2,6 +2,21 @@ import pandas as pd
 
 
 def fetch_csv_data(file_path):
+    """Fetch data from a CSV file.
+
+       This function fetches data from a CSV file and returns the keys and values as separate lists.
+
+       Args:
+           file_path (str): The path of the CSV file.
+
+       Returns:
+           tuple: A tuple containing the keys and values as separate lists.
+
+       Raises:
+           pd.errors.EmptyDataError: If the CSV file is empty.
+           FileNotFoundError: If the specified file path does not exist.
+           Exception: If there is an error reading the CSV file.
+       """
     keys = []
     values = []
 

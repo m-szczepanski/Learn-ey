@@ -47,6 +47,14 @@ class MainPanel(tk.Tk):
         self.frames["right_frame"].set_main_panel_button_visibility(False)
 
     def show_frame(self, frame_name):
+        """Show the specified frame.
+
+            Args:
+                frame_name (str): The name of the frame to show.
+
+            Raises:
+                KeyError: If the specified frame name does not exist in the frames dictionary.
+            """
         if frame := self.frames.get(frame_name):
             if frame_name == 'left_frame':
                 self.frames["right_frame"].set_main_panel_button_visibility(False)
@@ -64,6 +72,14 @@ class MainPanel(tk.Tk):
                 self.current_left_frame = frame
 
     def open_initial_frames(self):
+        """Open the initial frames of the application.
+
+            This method is responsible for opening the initial frames of the application,
+            including the left frame and the right frame.
+
+            Args:
+                self: The instance of the MainPanel class.
+            """
         for frame in self.frames:
             if frame != ['left_frame', 'right_frame']:
                 self.frames[frame].forget()
@@ -129,10 +145,24 @@ class LeftFrame(tk.Frame):
         self.esperanto_button.place(x=268, y=577)
 
     def update_top_panel(self):
+        """Update the top panel of the LeftFrame.
+
+            This method is responsible for updating the top panel of the LeftFrame with the saved sessions.
+
+            Args:
+                self: The instance of the LeftFrame class.
+            """
         saved_sessions = list_files_in_directory("./data/session_data", 5)
         self.populate_session_panel(saved_sessions)
 
     def populate_session_panel(self, saved_sessions):
+        """Populate the session panel with saved sessions.
+
+            This method populates the session panel in the LeftFrame with the saved sessions.
+
+            Args:
+                saved_sessions (list): A list of saved session names.
+            """
         panels_position_x = [255, 463, 47, 255, 463]
         panels_position_y = [42, 42, 211, 211, 211]
         panels_date_position_y = [168, 168, 337, 337, 337]
@@ -171,6 +201,13 @@ class LeftFrame(tk.Frame):
             session_delete_button.place(x=panels_position_x[i] + panel_width - 28, y=panels_delete_button_position_y[i])
 
     def delete_session(self, session_name):
+        """Delete a session.
+
+            This method deletes a session with the specified session name.
+
+            Args:
+                session_name (str): The name of the session to delete.
+            """
         if confirmation := messagebox.askyesno(
                 "Delete session",
                 f"Are you sure you want to delete this " f"session: {session_name[:-5]}?",
@@ -252,6 +289,13 @@ class RightFrame(tk.Frame):
         self.quit_button.place(x=38, y=602)
 
     def count_down(self, count):
+        """Count down the timer.
+
+            This method counts down the timer based on the specified count.
+
+            Args:
+                count (int): The initial count value for the timer.
+            """
         global num_of_ticks
         count_min = math.floor(count / 60)
         count_sec = count % 60
@@ -275,6 +319,13 @@ class RightFrame(tk.Frame):
                 self.tick.config(text=num_of_ticks)
 
     def reset_timer(self):
+        """Reset the timer.
+
+            This method resets the timer to its initial state.
+
+            Args:
+                self: The instance of the class.
+            """
         global repetitions, num_of_ticks
         self.after_cancel(timer)
         self.timer.config(text="--:--")
@@ -284,6 +335,16 @@ class RightFrame(tk.Frame):
         num_of_ticks = ""
 
     def play_sound(self, sound):
+        """Play a sound.
+
+            This method plays a sound when the Pomodoro Timer's status changes based on the specified sound number.
+
+            Args:
+                sound (int): The number representing the sound to play.
+
+            Raises:
+                ValueError: If the specified sound number is invalid.
+            """
         pygame.mixer.init()
         pygame.mixer.music.set_volume(0.5)
 
@@ -306,10 +367,25 @@ class RightFrame(tk.Frame):
         pygame.mixer.music.play(loops=0)  # Odtwarzanie dźwięku
 
     def open_settings(self):
+        """Open the settings window.
+
+            This method opens the settings window for the Pomodoro timer.
+
+            Args:
+                self: The instance of the class.
+            """
         root = tk.Toplevel()
         settings_app = PomodoroSettings(root)
 
     def get_settings(self):
+        """Get the Pomodoro settings.
+
+            This method reads the Pomodoro settings from a JSON file and returns the work, short break, and long break
+            durations.
+
+            Returns:
+                tuple: A tuple containing the work duration, short break duration, and long break duration.
+            """
         with open("components/Pomodoro/settings.json", 'r') as pomodoro_settings:
             data = json.load(pomodoro_settings)
         work_min = data["WORK_MIN"]
@@ -318,6 +394,13 @@ class RightFrame(tk.Frame):
         return work_min, short_break_min, long_break_min
 
     def start_timer(self):
+        """Start the timer.
+
+            This method starts the timer based on the specified settings and updates the timer display accordingly.
+
+            Args:
+                self: The instance of the class.
+            """
         global repetitions
         work_min, short_break_min, long_break_min = self.get_settings()
         repetitions += 1
@@ -335,14 +418,35 @@ class RightFrame(tk.Frame):
             self.status_label.config(image=self.timer_state_learning_time_bg)
 
     def open_main_panel(self):
+        """Open the main panel.
+
+            This method opens the main panel of the application and sets the visibility of the main panel button.
+
+            Args:
+                self: The instance of the class.
+            """
         if self.main_panel_button_enabled:
             self.master.show_frame("left_frame")
             self.set_main_panel_button_visibility(False)
 
     def set_main_panel_button_visibility(self, value):
+        """Set the visibility of the main panel button.
+
+            This method sets the visibility of the main panel button based on the specified value.
+
+            Args:
+                value (bool): The visibility value for the main panel button.
+            """
         self.main_panel_button_enabled = value
 
     def open_about(self):
+        """Open the 'about' file.
+
+          This method opens the 'about' file in the default application.
+
+          Args:
+              self: The instance of the class.
+          """
         file_path = '../docs/Projekt.docx'
         if os.path.exists(file_path):
             os.system(f'start {file_path}')
@@ -350,6 +454,13 @@ class RightFrame(tk.Frame):
             print("File does not exist!")
 
     def quit_app(self):
+        """Quit the application.
+
+            This method quits the application by destroying the root window.
+
+            Args:
+                self: The instance of the class.
+            """
         self.master.destroy()
 
 
@@ -401,10 +512,14 @@ class WordFrame(tk.Frame):
                                         background='#9ed2be', highlightthickness=0)
         self.safe_as_button.place(x=442, y=609)
 
-    def switch_panel_frame(self):
-        pass
-
     def get_data_from_file(self):
+        """Get data from a file.
+
+           This method gets data from a file specified by the user.
+
+           Returns:
+               tuple: A tuple containing the words and translations from the file.
+           """
         file_path = get_file_path()
         if file_path.endswith(".json"):
             self.words, self.translations = fetch_json_data(file_path)
@@ -414,6 +529,13 @@ class WordFrame(tk.Frame):
             print("File path is not supported. Chose either csv or json.")
 
     def safe_session(self):
+        """Save the session.
+
+            This method saves the session with the specified session name.
+
+            Args:
+                self: The instance of the class.
+            """
         session_name = self.safe_as_label.get()
         if len(session_name) > 8:
             (messagebox.showinfo
@@ -432,6 +554,13 @@ class WordFrame(tk.Frame):
         self.safe_as_label.delete(0, 'end')
 
     def append_arrays(self):
+        """Append the word and translation to the arrays.
+
+           This method appends the word and translation to the respective arrays.
+
+           Args:
+               self: The instance of the class.
+           """
         x = self.word_entry.get()
         y = self.translation_entry.get()
         if x != '' or y != '':
@@ -493,10 +622,14 @@ class ExpressionSection(tk.Frame):
                                         image=self.confirm_button_bg, bd=0, background='#9ed2be', highlightthickness=0)
         self.safe_as_button.place(x=442, y=609)
 
-    def switch_panel_frame(self):
-        pass
-
     def get_data_from_file(self):
+        """Get data from a file.
+
+            This method gets data from a file specified by the user.
+
+            Returns:
+                tuple: A tuple containing the words and translations from the file.
+            """
         file_path = get_file_path()
         print(file_path)
         if file_path.endswith(".json"):
@@ -507,6 +640,13 @@ class ExpressionSection(tk.Frame):
             print("File path is not supported. Chose either csv or json.")
 
     def safe_session(self):
+        """Save the session.
+
+            This method saves the session with the specified session name.
+
+            Args:
+                self: The instance of the class.
+            """
         session_name = self.safe_as_label.get()
         if len(session_name) > 8:
             messagebox.showinfo("Session name error", "Session name is too long. Maximum length is 8 characters.")
@@ -521,6 +661,13 @@ class ExpressionSection(tk.Frame):
         self.safe_as_label.delete(0, 'end')
 
     def append_arrays(self):
+        """Append the expression and definition to the arrays.
+
+           This method appends the expression and definition to the respective arrays.
+
+           Args:
+               self: The instance of the class.
+           """
         x = self.expression_entry.get()
         y = self.definition_entry.get()
         if x != '' or y != '':
@@ -543,6 +690,13 @@ class FullWordList(tk.Frame):
         self.create_buttons()
 
     def create_buttons(self):
+        """Create language buttons.
+
+            This method creates language buttons based on the available languages.
+
+            Args:
+                self: The instance of the class.
+            """
         button_width = 11
         button_height = 1
         x_pos = [90, 285, 485]
