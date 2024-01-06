@@ -2,7 +2,7 @@ import pytest
 import json
 import os
 from unittest.mock import patch
-from app.functions.safe_inserted_values import safe_session_data
+from app.functions.save_inserted_values import save_session_data
 
 # Constants for test paths and file names
 TEST_SESSION_PATH = "./data/session_data/"
@@ -29,7 +29,7 @@ def test_safe_session_data_happy_path(data1, data2, session_name, test_id):
 
     # Act
     with patch('tkinter.messagebox.showinfo') as mock_messagebox:
-        safe_session_data(data1, data2, session_name)
+        save_session_data(data1, data2, session_name)
 
     # Assert
     assert os.path.exists(session_file_path)
@@ -49,7 +49,7 @@ def test_safe_session_data_edge_cases(data1, data2, session_name, test_id):
 
     # Act
     with patch('tkinter.messagebox.showinfo') as mock_messagebox:
-        safe_session_data(data1, data2, session_name)
+        save_session_data(data1, data2, session_name)
 
     # Assert
     assert os.path.exists(session_file_path)
@@ -65,4 +65,4 @@ def test_safe_session_data_edge_cases(data1, data2, session_name, test_id):
 def test_safe_session_data_error_cases(data1, data2, session_name, expected_exception, test_id):
     # Act / Assert
     with pytest.raises(expected_exception):
-        safe_session_data(data1, data2, session_name)
+        save_session_data(data1, data2, session_name)

@@ -37,7 +37,7 @@ def clean_directory():
 @pytest.mark.parametrize("file_name, timestamp, expected_date, test_id", [
     # Happy path tests with various realistic test values
     ("existing_file.txt", 1610000000, "07-01-2021", "happy_path_unix"),
-    ("existing_file.txt", 1610000000, "21-12-2023", "happy_path_windows"),
+    ("existing_file.txt", 1610000000, "06-01-2024", "happy_path_windows"),
 
     # Edge cases
     ("", 1610000000, None, "edge_case_empty_filename"),

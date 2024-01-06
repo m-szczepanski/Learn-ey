@@ -53,7 +53,7 @@ class MainPanel(tk.Tk):
                 frame_name (str): The name of the frame to show.
 
             Raises:
-                KeyError: If the specified frame name does not exist in the frames dictionary.
+                KeyError: If the specified frame name does not exist in the 'frames' dictionary.
             """
         if frame := self.frames.get(frame_name):
             if frame_name == 'left_frame':
@@ -282,11 +282,11 @@ class RightFrame(tk.Frame):
 
         self.about_button = tk.Button(self, command=self.open_about, image=self.about_button_bg, bd=0,
                                       background='#cde3b6', highlightthickness=0, highlightbackground=self.cget("bg"))
-        self.about_button.place(x=38, y=537)
+        self.about_button.place(x=39, y=537)
 
         self.quit_button = tk.Button(self, command=self.quit_app, image=self.quit_button_bg, bd=0, background='#cde3b6',
                                      highlightthickness=0, highlightbackground='#cde3b6')
-        self.quit_button.place(x=38, y=602)
+        self.quit_button.place(x=39, y=603)
 
     def count_down(self, count):
         """Count down the timer.
@@ -354,7 +354,6 @@ class RightFrame(tk.Frame):
             3: "components/audio/e_chord.wav"
         }
 
-        # Sprawdzenie wartości sound i wywołanie odpowiedniego path w switch case
         if sound == 1:
             pygame.mixer.music.load(path[1])
         elif sound == 2:
@@ -364,7 +363,7 @@ class RightFrame(tk.Frame):
         else:
             raise ValueError("Nieprawidłowy numer dźwięku")
 
-        pygame.mixer.music.play(loops=0)  # Odtwarzanie dźwięku
+        pygame.mixer.music.play(loops=0)
 
     def open_settings(self):
         """Open the settings window.
@@ -551,7 +550,6 @@ class WordFrame(tk.Frame):
 
         self.safe_as_label.delete(0, 'end')
 
-        self.safe_as_label.delete(0, 'end')
 
     def append_arrays(self):
         """Append the word and translation to the arrays.

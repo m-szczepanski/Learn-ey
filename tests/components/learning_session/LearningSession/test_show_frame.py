@@ -1,6 +1,5 @@
 import pytest
 import tkinter as tk
-from app.components.learning_session import LearningSession
 
 
 # Mock class to simulate the self object with frames attribute

@@ -2,7 +2,7 @@ import json
 from tkinter import messagebox
 
 
-def safe_session_data(data1, data2, session_name):
+def save_session_data(data1, data2, session_name):
     """Safely save session data.
 
         This function safely saves the session data by writing it to a JSON file.

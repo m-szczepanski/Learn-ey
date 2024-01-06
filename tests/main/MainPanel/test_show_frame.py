@@ -82,7 +82,7 @@ def test_show_frame(frame_name, expected_side, expected_visibility, test_id):
         if frame_name == "left_frame":
             assert app.frames["right_frame"].visibility == expected_visibility, \
                 f"{test_id}: Right frame visibility should be {expected_visibility}."
-        if frame_name == "right_frame":
+        elif frame_name == "right_frame":
             assert app.current_left_frame is frame, \
                 f"{test_id}: Current left frame should be updated to the right frame."
     else:

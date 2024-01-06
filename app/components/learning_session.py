@@ -70,7 +70,8 @@ class LearningSession(tk.Toplevel):
     def random_dict(self, consecutive_limit=3):
         """Get a random dictionary.
 
-           This method returns a random dictionary from the available dictionaries, with a limit on consecutive selections.
+           This method returns a random dictionary from the available dictionaries,
+           with a limit on consecutive selections.
 
            Args:
                self: The instance of the class.
@@ -230,7 +231,6 @@ class LearningSession(tk.Toplevel):
                 value: The value of the wrong answer.
             """
         self.wrong_answers[key] = value
-        # print("---------------", self.wrong_answers)
 
     def force_close(self, wrong_answers, dict_len):
         """Force close the learning session.
