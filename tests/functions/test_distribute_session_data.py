@@ -18,19 +18,16 @@ happy_path_data = [
         "medium1": "medium1", "medium2": "medium2",
         "long1": "long1", "long2": "long2"
     }),
-    # Add more test cases with different lengths and combinations
 ]
 
 # Test data for edge cases
 edge_case_data = [
     (EDGE_CASE_ID + "_empty", "empty", {}),
-    # Add more edge cases like maximum length strings, special characters, etc.
 ]
 
 # Test data for error cases
 error_case_data = [
     (ERROR_CASE_ID + "_file_not_found", "nonexistent", FileNotFoundError),
-    # Add more error cases if necessary
 ]
 
 
@@ -45,7 +42,6 @@ def test_distribute_data_json_happy_path(test_id, file_name, expected_data):
         # Assert
         assert mock_file.call_args[0][0] == DATA_PATH + file_name + ".json"
         assert all(isinstance(d, dict) for d in result)
-        # Add more assertions to check if the data is distributed correctly
 
 
 @pytest.mark.parametrize("test_id, file_name, expected_data", edge_case_data)
@@ -55,9 +51,6 @@ def test_distribute_data_json_edge_cases(test_id, file_name, expected_data):
     with patch("builtins.open", mock_open(read_data=mock_data)):
         # Act
         result = distribute_data_json(file_name)
-
-        # Assert
-        # Assertions will depend on the edge case being tested
 
 
 @pytest.mark.parametrize("test_id, file_name, expected_exception", error_case_data)

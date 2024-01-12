@@ -52,9 +52,9 @@ class WordFlashcard(tk.Toplevel):
         self.dict_len = len(self.dict)
 
         self.protocol("WM_DELETE_WINDOW", lambda: self.force_close(self.unknown, self.dict_len))
-        self.next_card()
+        self.draw_card()
 
-    def next_card(self):
+    def draw_card(self):
         """Move to the next flashcard.
 
             This method moves to the next flashcard by selecting a random card from the dictionary and updating the
@@ -80,7 +80,6 @@ class WordFlashcard(tk.Toplevel):
             open_session_report(self.unknown, self.dict_len)
 
         self.canvas.itemconfig(self.canvas_bg, image=self.flashcard_front_bg)
-        print(len(self.dict))
 
     def flip_card(self):
         """Flip the flashcard.
@@ -119,7 +118,7 @@ class WordFlashcard(tk.Toplevel):
             """
         if self.current_card:
             del self.dict[self.current_card[0]]
-            self.next_card()
+            self.draw_card()
 
     def is_unknown(self):
         """Put current card to unknown list..
@@ -133,9 +132,9 @@ class WordFlashcard(tk.Toplevel):
                None.
            """
         if self.current_card:
-            self.unknown[self.current_card[0]] = self.current_card[1]  # Dodaj do słownika self.unknown
-            del self.dict[self.current_card[0]]  # Usuń z słownika self.dict
-            self.next_card()
+            self.unknown[self.current_card[0]] = self.current_card[1]
+            del self.dict[self.current_card[0]]
+            self.draw_card()
 
     def close(self):
         """Close the window.

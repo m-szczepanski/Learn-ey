@@ -33,11 +33,10 @@ def clean_directory():
     remove_test_directory()
 
 
-# Parametrized test cases
 @pytest.mark.parametrize("file_name, timestamp, expected_date, test_id", [
     # Happy path tests with various realistic test values
     ("existing_file.txt", 1610000000, "07-01-2021", "happy_path_unix"),
-    ("existing_file.txt", 1610000000, "06-01-2024", "happy_path_windows"),
+    ("existing_file.txt", 1610000000, datetime.today().strftime('%d-%m-%Y'), "happy_path_windows"),
 
     # Edge cases
     ("", 1610000000, None, "edge_case_empty_filename"),
@@ -64,3 +63,4 @@ def test_get_file_creation_time(file_name, timestamp, expected_date, test_id, cl
 
     # Assert
     assert result == expected_date, f"Test failed for test_id: {test_id}"
+

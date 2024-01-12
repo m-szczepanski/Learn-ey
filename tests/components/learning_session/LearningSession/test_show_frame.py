@@ -2,7 +2,6 @@ import pytest
 import tkinter as tk
 
 
-# Mock class to simulate the self object with frames attribute
 class MockFrame(tk.Frame):
     def __init__(self):
         super().__init__()
@@ -49,3 +48,4 @@ def test_show_frame(frame_name, frame_names, test_id):
             assert frame.winfo_ismapped() == 1, f"{test_id}: {frame_name} should be raised"
         else:
             assert frame.winfo_ismapped() == 0, f"{test_id}: {name} should be forgotten"
+
